@@ -97,7 +97,7 @@
 			<hr class="none">
 			<div class="item clearfix row">
 				<div class="labels col-xs-3 pull-left">
-					<span>Radio</span>
+					<span>Radius</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
 					<div class="col-xs-3 pull-left padding-zero">
@@ -127,52 +127,3 @@
 	</div>
 </body>
 </html>
-
-<script type="text/ng-template" id="addGeoAction.html">
-    <div class="header clearfix border-bottom-grey">
-        <h4 class="margin-zero">Add New Geo Action</h4>
-        <span class="icon icon-cross2 close-modal" ng-click="closeDialog()"></span>
-	</div>
-    <div class="padded clearfix">
-        <div class="content">
-			<div class="item clearfix row">
-				<div class="labels col-xs-3 pull-left">
-					<span>Item Title</span>
-				</div>
-				<div class="main col-xs-9 pull-right">
-					<input type="text" placeholder="Item Title" class="form-control">
-					<div class="alert alert-danger margin-top-ten alert-sm text-center" ng-show="error">Please enter an item title.</div>			        
-				</div>
-			</div>
-			<hr class="none">
-			<div class="item clearfix row">
-				<div class="labels col-xs-3 pull-left">
-					<span>Action Type</span>
-				</div>
-				<div class="main col-xs-9 pull-right">
-					<div class="dropdown" dropdown>
-						<button class="btn btn-default text-left dropdown-toggle" data-toggle="dropdown" dropdown-toggle aria-expanded="true">
-							<span class="pull-left">Action Type</span>
-					  		<span class="chevron icon-chevron-down pull-right"></span>
-						</button>
-						<ul class="dropdown-menu extended" role="menu">
-							<li><a>Action Type</a></li>
-							<li><a>Action Type</a></li>
-							<li><a>Action Type</a></li>
-		                </ul>
-					</div>
-					<div class="alert alert-danger margin-top-ten alert-sm text-center" ng-show="error">Please select an action type.</div>			        
-				</div>
-			</div>
-        </div>
-    </div>
-    <div class="bottom border-top-grey clearfix">
-        <div class="col-xs-6 pull-left text-center">
-            <a class="text-danger default-background-hover transition-third"
-               ng-click="closeDialog('cancel')">Cancel</a>
-        </div>
-        <div class="col-xs-6 pull-right text-center border-left-grey">
-            <a class="text-success default-background-hover transition-third" ng-click="">Add</a>
-        </div>
-    </div>
-</script>
