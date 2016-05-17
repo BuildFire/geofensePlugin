@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="geoFencePluginContent">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -9,14 +9,13 @@
 	<!-- JS -->
 	<script src="../../../../scripts/buildfire.js"></script>
    
- 	<!--
     <script src="../../../../scripts/angular/angular.min.js"></script>
+    <script src="../../../../scripts/angular/angular-animate.min.js"></script>
     <script src="../../../../scripts/angular/ui-bootstrap.min.js"></script>
-
-    <script src="../../../../scripts/jquery/jquery-1.11.2.min.js"></script>
-    -->
+    <script src="app.js"></script>
+    <script src="controllers/content.home.controller.js"></script>
 </head>
-<body>
+<body ng-controller="ContentHomeCtrl as ContentHome">
     <div class="item clearfix row">
 		<div class="col-xs-4 col-xs-offset-4">
 			<a class="btn btn-success stretch">Add New Geo Action</a>
