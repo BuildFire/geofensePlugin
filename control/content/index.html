@@ -13,6 +13,10 @@
     <script src="../../../../scripts/angular/angular-animate.min.js"></script>
     <script src="../../../../scripts/angular/ui-bootstrap.min.js"></script>
     <script src="app.js"></script>
+    <script src="directives.js"></script>
+	<!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>-->
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpEguTSmOeMQM-4lLaJRoyWN8SlUrOjkg&v=3.exp&libraries=places"></script>
+	<script src="controllers/content.home.controller.js"></script>
     <script src="controllers/content.home.controller.js"></script>
 </head>
 <body ng-controller="ContentHomeCtrl as ContentHome">
@@ -90,7 +94,12 @@
 					<span>Epicenter</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
-					<input type="text" placeholder="Enter address or lat/long coordinates" class="form-control">
+					<input type="text" placeholder="Enter address or lat/long coordinates" class="form-control" id="googleMapAutocomplete"
+						   google-location-search callback-fn="ContentHome.setLocation(data)"
+						   ng-model="ContentHome.currentAddress"
+						   ng-enter="ContentHome.setCoordinates()"
+						   ng-paste="ContentHome.locationAutocompletePaste()"
+						   ng-change="ContentHome.clearData()">
 				</div>
 			</div>
 			<hr class="none">
@@ -119,7 +128,7 @@
 					<span>Affected Area</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
-					<div style="height:280px; width:100%; background:#eef0f0;"></div>
+					<div style="height:280px; width:100%; background:#eef0f0;" google-map></div>
 				</div>
 			</div>
 		</div>
