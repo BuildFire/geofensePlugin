@@ -33,10 +33,15 @@
                 scope: {coordinates: '=', draggedGeoData: '&draggedFn'},*/
                 link: function (scope, elem, attrs) {
 
+                    buildfire.geo.getCurrentPosition(function(err,data){
+                        console.log('getCurrentPosition data------',data,'getCurrentPosition----err-----',err);
+                    });
+
                     console.log('elem--------------------------------directive---',elem);
+                    console.log('scope--------------------------------directive---',scope);
 
                     var map = new google.maps.Map(elem[0], {
-                        zoom: 9,
+                        zoom: 10,
                         center: {lat: 37.090, lng: -95.712}
                     });
 
@@ -51,11 +56,21 @@
                         fillOpacity: 0.35,
                         map: map,
                         center: {lat: 37.090, lng: -95.712},
-                        radius: 9000,
+                        radius: 1000,
                         editable: true
                     });
                     circle.addListener('radius_changed', function() {
+                        scope.$apply(function(){
+                            console.log('radius--------------------',circle.getRadius());
+                            scope.ContentHome.geoAction=circle.getRadius();
+                        });
                         console.log('City Circle Event called');
+                        alert(circle.getRadius());
+                    });
+                    circle.addListener('center_changed', function() {
+                        var newCenter=circle.getCenter();
+                        console.log('center_changed Event called',newCenter.lat(),newCenter.lng());
+                        map.panTo(circle.getCenter());
                         alert(circle.getRadius());
                     });
 

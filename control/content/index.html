@@ -73,7 +73,7 @@
 					<span>Title</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
-					<input type="text" placeholder="Title" class="form-control">
+					<input type="text" placeholder="Title" class="form-control" ng-model="ContentHome.geoAction.title">
 				</div>
 			</div>
 			<hr class="none">
@@ -96,7 +96,7 @@
 				<div class="main col-xs-9 pull-right">
 					<input type="text" placeholder="Enter address or lat/long coordinates" class="form-control" id="googleMapAutocomplete"
 						   google-location-search callback-fn="ContentHome.setLocation(data)"
-						   ng-model="ContentHome.currentAddress"
+						   ng-model="ContentHome.geoAction.epicenter"
 						   ng-enter="ContentHome.setCoordinates()"
 						   ng-paste="ContentHome.locationAutocompletePaste()"
 						   ng-change="ContentHome.clearData()">
@@ -105,17 +105,17 @@
 			<hr class="none">
 			<div class="item clearfix row">
 				<div class="labels col-xs-3 pull-left">
-					<span>Radio</span>
+					<span>Radius</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
 					<div class="col-xs-3 pull-left padding-zero">
-						<input type="text" placeholder="0" class="form-control text-center">
+						<input type="text" readonly placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.radius">
 					</div>
 					<div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
 						Miles and
 					</div>
 					<div class="col-xs-3 pull-left padding-zero">
-						<input type="text" placeholder="0" class="form-control text-center">
+						<input type="text" readonly placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.radius">
 					</div>
 					<div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
 						Feet
