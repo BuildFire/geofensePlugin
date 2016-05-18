@@ -5,7 +5,8 @@
         .module('geoFencePluginContent',
         [
             'ngAnimate',
-            'ui.bootstrap'
+            'ui.bootstrap',
+            'geoFenceServices'
         ])
         //injected ui.bootstrap for angular bootstrap component
         .config(['$compileProvider', function ($compileProvider) {
