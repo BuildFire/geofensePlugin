@@ -25,7 +25,7 @@
             GEO_ACTION: {
                 title: '',
                 actionToPerform: {},
-                epicenter: '',
+                epicenter: {},
                 radius: 1000 //in meters
             }
         });

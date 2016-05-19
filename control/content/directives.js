@@ -1,7 +1,7 @@
 (function (angular, buildfire) {
     "use strict";
     angular
-        .module('geoFencePluginContent', [])
+        .module('geoFencePluginContent')
         .directive('googleLocationSearch', function () {
             return {
                 restrict: 'A',

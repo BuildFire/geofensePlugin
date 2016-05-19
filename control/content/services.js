@@ -1,4 +1,4 @@
-(function (angular, buildfire, location) {
+(function (angular, buildfire) {
     'use strict';
     //created geoFenceServices module
     angular
@@ -6,17 +6,6 @@
         .provider('Buildfire', [function () {
             this.$get = function () {
                 return buildfire;
-            };
-        }])
-        .factory('Location', [function () {
-            var _location = location;
-            return {
-                go: function (path) {
-                    _location.href = path;
-                },
-                goToHome: function () {
-                    _location.href = _location.href.substr(0, _location.href.indexOf('#'));
-                }
             };
         }])
         .factory("DB", ['Buildfire', '$q', 'MESSAGES', 'CODES', function (Buildfire, $q, MESSAGES, CODES) {
@@ -223,4 +212,4 @@
             }
         }]);
 
-})(window.angular, window.buildfire, window.location);
+})(window.angular, window.buildfire);

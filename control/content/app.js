@@ -4,9 +4,11 @@
     angular
         .module('geoFencePluginContent',
         [
+            'geoFenceServices',
+            'geoFenceEnums',
             'ngAnimate',
-            'ui.bootstrap',
-            'geoFenceServices'
+            'ui.bootstrap'
+
         ])
         //injected ui.bootstrap for angular bootstrap component
         .config(['$compileProvider', function ($compileProvider) {
