@@ -3,28 +3,36 @@
 (function (angular) {
     angular
         .module('geoFencePluginContent')
-        .controller('ContentHomeCtrl', ['$scope','$timeout','Utils',
-            function ($scope,$timeout,Utils) {
+        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB',
+            function ($scope, $timeout, Utils, COLLECTIONS, DB) {
                 console.log('--------ContentHomeCtrl Controller Loaded-----');
-                var ContentHome=this;
-                ContentHome.geoAction={
-                    title:'',
-                    actionToPerform:{},
-                    epicenter:{address:'',coordinates:{lat:'',long:''}},
-                    radius: 1000 //in meters
+                var ContentHome = this;
+                ContentHome.geoAction = {
+                    data: {
+
+                        title: '',
+                        actionToPerform: {},
+                        epicenter: {address: '', coordinates: {lat: '', long: ''}},
+                        radius: 1000 //in meters
+                    }
                 };
-                ContentHome.center={};
+
+                var tmrDelayForItem = null
+                    , GeoActions = new DB(COLLECTIONS.GeoActions)
+                    , updating = false
+                    , isNewItemInserted = false;
+                ContentHome.center = {};
 
                 ContentHome.setLocation = function (data) {
-                    console.log('SetLoaction caleed-------------------',data);
+                    console.log('SetLoaction caleed-------------------', data);
                     ContentHome.selectedLocation = data.location;
                     ContentHome.currentCoordinates = data.coordinates;
 
-                    ContentHome.geoAction.epicenter.address=data.location;
-                    ContentHome.geoAction.epicenter.coordinates=ContentHome.center;
+                    ContentHome.geoAction.data.epicenter.address = data.location;
+                    ContentHome.geoAction.data.epicenter.coordinates = ContentHome.center;
 
-                    ContentHome.center.lat=data.coordinates[1];
-                    ContentHome.center.lng=data.coordinates[0];
+                    ContentHome.center.lat = data.coordinates[1];
+                    ContentHome.center.lng = data.coordinates[0];
                     $scope.$digest();
                 };
 
@@ -91,10 +99,10 @@
                                 if (status == google.maps.GeocoderStatus.OK) {
                                     var lat = results[0].geometry.location.lat(),
                                         lng = results[0].geometry.location.lng();
-                                    ContentHome.geoAction.epicenter.address=firstResult;
-                                    ContentHome.geoAction.epicenter.lat=lat;
-                                    ContentHome.geoAction.epicenter.lng=lng;
-                                    ContentHome.center={lat:lat,lng:lng};
+                                    ContentHome.geoAction.data.epicenter.address = firstResult;
+                                    ContentHome.geoAction.data.epicenter.lat = lat;
+                                    ContentHome.geoAction.data.epicenter.lng = lng;
+                                    ContentHome.center = {lat: lat, lng: lng};
                                     $("#googleMapAutocomplete").blur();
                                 }
                                 else {
@@ -116,6 +124,87 @@
                 };
 
 
+                /**
+                 * This updateMasterItem will update the ContentMedia.masterItem with passed item
+                 * @param item
+                 */
+                function updateMasterItem(item) {
+                    ContentHome.masterGeoAction = angular.copy(item);
+                }
+
+                /**
+                 * This resetItem will reset the ContentMedia.item with ContentMedia.masterItem
+                 */
+                function resetItem() {
+                    ContentHome.geoAction.data = angular.copy(ContentHome.masterGeoAction);
+                }
+
+
+                /**
+                 * isUnChanged to check whether there is change in controller media item or not
+                 * @param item
+                 * @returns {*|boolean}
+                 */
+                function isUnChanged(item) {
+                    return angular.equals(item, ContentHome.masterGeoAction);
+                }
+
+                ContentHome.insertAndUpdate = function (_item) {
+                    console.log('insertAndUpdate-----------------method called-----');
+                    updating = true;
+                    if (_item.id) {
+                        GeoActions.update(_item.id, _item.data).then(function (data) {
+                            console.log('Item updated successfully----------------',data);
+                            updating = false;
+                        }, function (err) {
+                            updating = false;
+                            //console.log('Error while updating data---', err);
+                        });
+                    }
+                    else if (!isNewItemInserted) {
+                        isNewItemInserted = true;
+                        GeoActions.insert(_item.data).then(function (data) {
+                            ContentHome.geoAction=data;
+                            updateMasterItem(data);
+                            console.log('new ---------------- Item inserted-------------------------------', data);
+                            //updateMasterItem(ContentItem.item);
+
+
+                        }, function (err) {
+                            //resetItem();
+                            updating = false;
+                            //isNewItemInserted = false;
+                        });
+                    }
+                };
+
+                //to validate the action with title
+                function isValidItem(action) {
+                    return action.title;
+                }
+
+
+                /**
+                 * updateItemWithDelay called when ever there is some change in current geo action
+                 * @param _item
+                 */
+                function updateItemsWithDelay(_item) {
+                    if (updating)
+                        return;
+                    if (tmrDelayForItem) {
+                        $timeout.cancel(tmrDelayForItem);
+                    }
+                    ContentHome.isItemValid = isValidItem(ContentHome.geoAction.data);
+                    if (_item && !isUnChanged(_item) && ContentHome.isItemValid) {
+                        tmrDelayForItem = $timeout(function () {
+                            insertAndUpdate(_item);
+                        }, 300);
+                    }
+                }
+
+                /*$scope.$watch(function () {
+                 return ContentHome.geoAction.data;
+                 }, updateItemsWithDelay, true);*/
 
             }]);
 })(window.angular);

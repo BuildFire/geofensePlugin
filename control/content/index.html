@@ -28,7 +28,7 @@
 <body ng-controller="ContentHomeCtrl as ContentHome">
     <div class="item clearfix row">
 		<div class="col-xs-4 col-xs-offset-4">
-			<a class="btn btn-success stretch">Add New Geo Action</a>
+			<a class="btn btn-success stretch" ng-click="ContentHome.insertAndUpdate(ContentHome.geoAction)">Add New Geo Action</a>
 		</div>
 	</div>
 	<hr class="none">
@@ -79,7 +79,7 @@
 					<span>Title</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
-					<input type="text" placeholder="Title" class="form-control" ng-model="ContentHome.geoAction.title">
+					<input type="text" placeholder="Title" class="form-control" ng-model="ContentHome.geoAction.data.title">
 				</div>
 			</div>
 			<hr class="none">
@@ -115,13 +115,13 @@
 				</div>
 				<div class="main col-xs-9 pull-right">
 					<div class="col-xs-3 pull-left padding-zero">
-						<input type="text" readonly placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.radius">
+						<input type="text" readonly placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.data.radius">
 					</div>
 					<div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
 						Miles and
 					</div>
 					<div class="col-xs-3 pull-left padding-zero">
-						<input type="text" readonly placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.radius">
+						<input type="text" readonly placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.data.radius">
 					</div>
 					<div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
 						Feet

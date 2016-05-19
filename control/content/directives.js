@@ -72,7 +72,7 @@
                             fillOpacity: 0.35,
                             map: map,
                             center: (scope.ContentHome.center && scope.ContentHome.center.lat && scope.ContentHome.center.lng && scope.ContentHome.center) || ({"lat":32.715738,"lng":-117.16108380000003}),
-                            radius: (scope.ContentHome.geoAction && parseInt(scope.ContentHome.geoAction.radius)) || 1000,
+                            radius: (scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseInt(scope.ContentHome.geoAction.data.radius)) || 1000,
                             editable: true
                         });
                         if (map && circle)
@@ -80,7 +80,7 @@
                         circle.addListener('radius_changed', function () {
                             scope.$apply(function () {
                                 console.log('radius--------------------', circle.getRadius());
-                                scope.ContentHome.geoAction.radius = circle.getRadius();
+                                scope.ContentHome.geoAction.data.radius = circle.getRadius();
                             });
                             console.log('City Circle Event called');
                             alert(circle.getRadius());
