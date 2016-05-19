@@ -98,7 +98,7 @@
 				<div class="main col-xs-9 pull-right">
 					<input type="text" placeholder="Enter address or lat/long coordinates" class="form-control" id="googleMapAutocomplete"
 						   google-location-search callback-fn="ContentHome.setLocation(data)"
-						   ng-model="ContentHome.geoAction.epicenter"
+						   ng-model="ContentHome.selectedLocation"
 						   ng-enter="ContentHome.setCoordinates()"
 						   ng-paste="ContentHome.locationAutocompletePaste()"
 						   ng-change="ContentHome.clearData()">
@@ -130,7 +130,7 @@
 					<span>Affected Area</span>
 				</div>
 				<div class="main col-xs-9 pull-right">
-					<div style="height:280px; width:100%; background:#eef0f0;" google-map></div>
+					<div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"></div>
 				</div>
 			</div>
 		</div>

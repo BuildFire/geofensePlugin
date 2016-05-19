@@ -1,4 +1,4 @@
-(function (angular,buildfire) {
+(function (angular, buildfire) {
     "use strict";
     angular
         .module('geoFencePluginContent', [])
@@ -15,6 +15,7 @@
                         var location = autocomplete.getPlace().formatted_address;
                         if (autocomplete.getPlace().geometry) {
                             var coordinates = [autocomplete.getPlace().geometry.location.lng(), autocomplete.getPlace().geometry.location.lat()];
+                            console.log('scope.setLocationInController-------in directive-------', location, coordinates);
                             scope.setLocationInController({
                                 data: {
                                     location: location,
@@ -26,19 +27,21 @@
                 }
             };
         })
-        .directive("googleMap", function () {
+        .directive("googleMap", ['$timeout', function ($timeout) {
             return {
                 template: "<div></div>",
                 /*replace: true,
-                scope: {coordinates: '=', draggedGeoData: '&draggedFn'},*/
+                 scope: {coordinates: '=', draggedGeoData: '&draggedFn'},*/
                 link: function (scope, elem, attrs) {
+                    var circle;
 
-                    buildfire.geo.getCurrentPosition(function(err,data){
-                        console.log('getCurrentPosition data------',data,'getCurrentPosition----err-----',err);
+                    buildfire.geo.getCurrentPosition(function (err, data) {
+                        console.log('getCurrentPosition data------', data, 'getCurrentPosition----err-----', err);
                     });
 
-                    console.log('elem--------------------------------directive---',elem);
-                    console.log('scope--------------------------------directive---',scope);
+                    console.log('elem--------------------------------directive---', elem);
+                    console.log('attrs--------------------------------directive---', attrs);
+                    console.log('scope--------------------------------directive---', scope);
 
                     var map = new google.maps.Map(elem[0], {
                         zoom: 10,
@@ -48,94 +51,64 @@
                     // Construct the circle for each value in citymap.
                     // Note: We scale the area of the circle based on the population.
                     // Add the circle for this city to the map.
-                    var circle = new google.maps.Circle({
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        fillColor: '#FF0000',
-                        fillOpacity: 0.35,
-                        map: map,
-                        center: {lat: 37.090, lng: -95.712},
-                        radius: 1000,
-                        editable: true
-                    });
-                    circle.addListener('radius_changed', function() {
-                        scope.$apply(function(){
-                            console.log('radius--------------------',circle.getRadius());
-                            scope.ContentHome.geoAction=circle.getRadius();
+
+
+                    attrs.$observe('googleMap', redrawTheCircle);
+
+
+                    /*scope.$observe()$watch(function () {
+                     return scope.ContentHome.center;
+                     }, redrawTheCircle, true);*/
+
+                    function redrawTheCircle(newVal, oldVal) {
+                        console.log('GoogleMap---------------------------', newVal, oldVal);
+                        if (circle)
+                            circle.setMap(null);
+                        circle = new google.maps.Circle({
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.35,
+                            map: map,
+                            center: (scope.ContentHome.center && scope.ContentHome.center.lat && scope.ContentHome.center.lng && scope.ContentHome.center) || ({"lat":32.715738,"lng":-117.16108380000003}),
+                            radius: (scope.ContentHome.geoAction && parseInt(scope.ContentHome.geoAction.radius)) || 1000,
+                            editable: true
                         });
-                        console.log('City Circle Event called');
-                        alert(circle.getRadius());
-                    });
-                    circle.addListener('center_changed', function() {
-                        var newCenter=circle.getCenter();
-                        console.log('center_changed Event called',newCenter.lat(),newCenter.lng());
-                        map.panTo(circle.getCenter());
-                        alert(circle.getRadius());
-                    });
-
-                    /*var geocoder = new google.maps.Geocoder();
-                    var location;
-                    scope.$watch('coordinates', function (newValue, oldValue) {
-                        if (newValue) {
-                            scope.coordinates = newValue;
-                            if (scope.coordinates.length) {
-                                var map = new google.maps.Map(elem[0], {
-                                    center: new google.maps.LatLng(scope.coordinates[1], scope.coordinates[0]),
-                                    zoomControl: false,
-                                    streetViewControl: false,
-                                    mapTypeControl: false,
-                                    zoom: 15,
-                                    mapTypeId: google.maps.MapTypeId.ROADMAP
-                                });
-                                var marker = new google.maps.Marker({
-                                    position: new google.maps.LatLng(scope.coordinates[1], scope.coordinates[0]),
-                                    map: map,
-                                    draggable: true
-                                });
-
-                                var styleOptions = {
-                                    name: "Report Error Hide Style"
-                                };
-                                var MAP_STYLE = [
-                                    {
-                                        stylers: [
-                                            {visibility: "on"}
-                                        ]
-                                    }];
-                                var mapType = new google.maps.StyledMapType(MAP_STYLE, styleOptions);
-                                map.mapTypes.set("Report Error Hide Style", mapType);
-                                map.setMapTypeId("Report Error Hide Style");
-                            }
-                            google.maps.event.addListener(marker, 'dragend', function (event) {
-                                scope.coordinates = [event.latLng.lng(), event.latLng.lat()];
-                                geocoder.geocode({
-                                    latLng: marker.getPosition()
-                                }, function (responses) {
-                                    if (responses && responses.length > 0) {
-                                        scope.location = responses[0].formatted_address;
-                                        scope.draggedGeoData({
-                                            data: {
-                                                location: scope.location,
-                                                coordinates: scope.coordinates
-                                            }
-                                        });
-                                    } else {
-                                        location = 'Cannot determine address at this location.';
-                                    }
-
-                                });
+                        if (map && circle)
+                            map.panTo(circle.getCenter());
+                        circle.addListener('radius_changed', function () {
+                            scope.$apply(function () {
+                                console.log('radius--------------------', circle.getRadius());
+                                scope.ContentHome.geoAction.radius = circle.getRadius();
                             });
-                        }
-                    }, true);*/
+                            console.log('City Circle Event called');
+                            alert(circle.getRadius());
+                        });
+                        /* $timeout(function(){
+                         circle.setMap(null);
+                         },5000);*/
+                        circle.addListener('center_changed', function () {
+                            var newCenter = circle.getCenter();
+                            console.log('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
+                            scope.ContentHome.center = {lat: newCenter.lat(), lng: newCenter.lng()};
+                            scope.$apply(function(){
+                                scope.ContentHome.selectedLocation=newCenter.lat()+','+newCenter.lng();
+                            });
+                            map.panTo(circle.getCenter());
+                            alert(circle.getRadius());
+                        });
+                        console.log('cenetr changed-----------------------------------------------', scope.ContentHome.center);
+                    }
+
                 }
             }
-        })
+        }])
         .directive('ngEnter', function () {
             return function (scope, element, attrs) {
                 element.bind("keydown keypress", function (event) {
-                    if (event.which === 13) {
-                        var val = $(element).val(),
+                    if (event.which === 13 && element && element.length) {
+                        var val = element[0].value,
                             regex = /^[0-9\-\., ]+$/g;
                         if (regex.test(val)) {
                             scope.$apply(function () {
@@ -148,4 +121,4 @@
                 });
             };
         })
-})(window.angular,buildfire);
+})(window.angular, buildfire);
