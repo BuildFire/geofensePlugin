@@ -94,6 +94,8 @@
                             scope.ContentHome.center = {lat: newCenter.lat(), lng: newCenter.lng()};
                             scope.$apply(function(){
                                 scope.ContentHome.selectedLocation=newCenter.lat()+','+newCenter.lng();
+                                scope.ContentHome.geoAction.data.epicenter.address=scope.ContentHome.selectedLocation;
+                                scope.ContentHome.geoAction.data.epicenter.coordinates=scope.ContentHome.center;
                             });
                             map.panTo(circle.getCenter());
                             alert(circle.getRadius());

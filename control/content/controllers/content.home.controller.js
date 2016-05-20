@@ -24,6 +24,18 @@
                     }
                 };
 
+                ContentHome.selectItem=function(item){
+                    console.log('selectItem method called-------------------',item);
+                    if(item && item.data){
+                        ContentHome.geoAction=item;
+                        if(item.data.epicenter && item.data.epicenter.coordinates){
+                            ContentHome.center=item.data.epicenter.coordinates;
+                            ContentHome.selectedLocation=item.data.epicenter.address;
+                        }
+                    }
+
+                };
+
                 var tmrDelayForItem = null
                     , GeoActions = new DB(COLLECTIONS.GeoActions)
                     , updating = false
