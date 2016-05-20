@@ -81,6 +81,7 @@
                             scope.$apply(function () {
                                 console.log('radius--------------------', circle.getRadius());
                                 scope.ContentHome.geoAction.data.radius = circle.getRadius();
+                                console.log('scope.ContentHome.geoAction-----------------',scope.ContentHome.geoAction);
                             });
                             console.log('City Circle Event called');
                             alert(circle.getRadius());

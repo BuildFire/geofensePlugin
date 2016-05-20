@@ -23,10 +23,12 @@
         })
         .constant('DEFAULT_DATA', {
             GEO_ACTION: {
-                title: '',
-                actionToPerform: {},
-                epicenter: {},
-                radius: 1000 //in meters
+                data: {
+                    title: '',
+                    actionToPerform: {},
+                    epicenter: {address: '', coordinates: {lat: '', long: ''}},
+                    radius: 1000 //in meters
+                }
             }
         });
 

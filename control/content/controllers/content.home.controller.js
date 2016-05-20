@@ -3,8 +3,8 @@
 (function (angular) {
     angular
         .module('geoFencePluginContent')
-        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB','Modals',
-            function ($scope, $timeout, Utils, COLLECTIONS, DB,Modals) {
+        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA',
+            function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA) {
                 console.log('--------ContentHomeCtrl Controller Loaded-----');
                 var ContentHome = this;
                 var _skip = 0,
@@ -16,7 +16,14 @@
                 };
                 ContentHome.geoAction = {
                     data: {
-
+                        title: '',
+                        actionToPerform: {},
+                        epicenter: {address: '', coordinates: {lat: '', long: ''}},
+                        radius: 1000 //in meters
+                    }
+                };
+                ContentHome.masterGeoAction = {
+                    data: {
                         title: '',
                         actionToPerform: {},
                         epicenter: {address: '', coordinates: {lat: '', long: ''}},
@@ -24,13 +31,14 @@
                     }
                 };
 
-                ContentHome.selectItem=function(item){
-                    console.log('selectItem method called-------------------',item);
-                    if(item && item.data){
-                        ContentHome.geoAction=item;
-                        if(item.data.epicenter && item.data.epicenter.coordinates){
-                            ContentHome.center=item.data.epicenter.coordinates;
-                            ContentHome.selectedLocation=item.data.epicenter.address;
+                ContentHome.selectItem = function (item) {
+                    console.log('selectItem method called-------------------', item);
+                    if (item && item.data) {
+                        ContentHome.geoAction = item;
+                        updateMasterItem(item);
+                        if (item.data.epicenter && item.data.epicenter.coordinates) {
+                            ContentHome.center = item.data.epicenter.coordinates;
+                            ContentHome.selectedLocation = item.data.epicenter.address;
                         }
                     }
 
@@ -143,6 +151,16 @@
                 };
 
 
+                ContentHome.addNewItem = function () {
+                    ContentHome.geoAction = DEFAULT_DATA.GEO_ACTION;
+                    ContentHome.selectedLocation = '';
+                    ContentHome.center = {
+                        lat: '',
+                        lng: ''
+                    }
+                };
+
+
                 /**
                  * ContentHome.noMore tells if all data has been loaded
                  */
@@ -173,7 +191,6 @@
                         ContentHome.isBusy = false;
                     });
                 };
-
 
 
                 /**
@@ -232,12 +249,13 @@
                     return angular.equals(item, ContentHome.masterGeoAction);
                 }
 
-                ContentHome.insertAndUpdate = function (_item) {
-                    console.log('insertAndUpdate-----------------method called-----');
+                function insertAndUpdate(_item) {
+                    console.log('insertAndUpdate-----------------method called-----', _item);
                     updating = true;
                     if (_item.id) {
                         GeoActions.update(_item.id, _item.data).then(function (data) {
                             console.log('Item updated successfully----------------', data);
+                            updateMasterItem(data);
                             updating = false;
                         }, function (err) {
                             updating = false;
@@ -259,11 +277,11 @@
                             //isNewItemInserted = false;
                         });
                     }
-                };
+                }
 
                 //to validate the action with title
                 function isValidItem(action) {
-                    return action.title;
+                    return action.data && action.data.title;
                 }
 
 
@@ -277,7 +295,7 @@
                     if (tmrDelayForItem) {
                         $timeout.cancel(tmrDelayForItem);
                     }
-                    ContentHome.isItemValid = isValidItem(ContentHome.geoAction.data);
+                    ContentHome.isItemValid = isValidItem(_item);
                     if (_item && !isUnChanged(_item) && ContentHome.isItemValid) {
                         tmrDelayForItem = $timeout(function () {
                             insertAndUpdate(_item);
@@ -285,9 +303,9 @@
                     }
                 }
 
-                /*$scope.$watch(function () {
-                 return ContentHome.geoAction.data;
-                 }, updateItemsWithDelay, true);*/
+                $scope.$watch(function () {
+                    return ContentHome.geoAction;
+                }, updateItemsWithDelay, true);
 
             }]);
 })(window.angular);
