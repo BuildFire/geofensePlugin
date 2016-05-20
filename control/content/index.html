@@ -35,8 +35,7 @@
 <hr class="none">
 <div class="item clearfix row tabs border-top-grey">
     <div class="col-xs-5 pull-left padding-right-zero">
-        <div id="items-scroll-infinite" class="draggable-list-view no-media wide-list has-btn-link"
-             style="background:#fff;">
+        <div id="items-scroll-infinite"  class="draggable-list-view no-media wide-list has-btn-link" style="background:#fff;">
             <div infinite-scroll-distance="0" infinite-scroll="ContentHome.getMore()"
                  infinite-scroll-disabled="ContentHome.noMore" infinite-scroll-container="'#items-scroll-infinite'">
                 <div class="d-item double-line square-icon clearfix" ng-repeat="item in ContentHome.items">
@@ -49,16 +48,123 @@
                         </div>
                     </div>
                 </div>
-               <!-- <div class="d-item double-line square-icon clearfix active">
+                <!--<div class="d-item double-line square-icon clearfix active">
                     <div class="copy pull-right">
                         <span class="text-primary title ellipsis pull-left">Item Title</span>
                         <span class="title ellipsis pull-left">Action Type</span>
-
                         <div class="pull-right">
                             <span class="btn-icon btn-delete-icon btn-danger"></span>
                         </div>
                     </div>
                 </div>-->
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-7 border-left-grey pull-right padding-top-twenty">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Title</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <input type="text" placeholder="Title" class="form-control">
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Action to Perform</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <a class="btn btn-primary padding-left-thirty padding-right-thirty">Select Action</a>
+                <a class="text-danger margin-left-ten small">Clear Action</a>
+
+                <p class="info no-icon margin-top-ten">Action Selected: [Action_type]</p>
+
+                <p class="info no-icon margin-zero">Link: [Link]</p>
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Epicenter</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <input type="text" placeholder="Enter address or lat/long coordinates" class="form-control"
+                       id="googleMapAutocomplete"
+                       google-location-search callback-fn="ContentHome.setLocation(data)"
+                       ng-model="ContentHome.selectedLocation"
+                       ng-enter="ContentHome.setCoordinates()"
+                       ng-paste="ContentHome.locationAutocompletePaste()"
+                       ng-change="ContentHome.clearData()">
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Radius</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <div class="col-xs-3 pull-left padding-zero">
+                    <input type="text" placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.data.radius">
+                </div>
+                <div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
+                    Miles and
+                </div>
+                <div class="col-xs-3 pull-left padding-zero">
+                    <input type="text" placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.data.radius">
+                </div>
+                <div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
+                    Feet
+                </div>
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Affected Area</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!--<body ng-controller="ContentHomeCtrl as ContentHome">
+<div class="item clearfix row">
+    <div class="col-xs-4 col-xs-offset-4">
+        <a class="btn btn-success stretch" ng-click="ContentHome.insertAndUpdate(ContentHome.geoAction)">Add New Geo
+            Action</a>
+    </div>
+</div>
+<hr class="none">
+<div class="item clearfix row tabs border-top-grey">
+    <div class="col-xs-5 pull-left padding-right-zero">
+        <div id="items-scroll-infinite" class="draggable-list-view no-media wide-list has-btn-link"
+             style="background:#fff;">
+            <div infinite-scroll-distance="0" infinite-scroll="ContentHome.getMore()"
+                 infinite-scroll-disabled="ContentHome.noMore" infinite-scroll-container="'#items-scroll-infinite'">
+                <div class="d-item double-line square-icon clearfix" ng-repeat="item in ContentHome.items">
+                    <div class="copy pull-right">
+                        <span class="text-primary title ellipsis pull-left">{{item.data.title}}</span>
+                        <span class="title ellipsis pull-left">Action Type</span>
+
+                        <div class="pull-right">
+                            <span class="btn-icon btn-delete-icon btn-danger"
+                                  ng-click="ContentHome.removeListItem($index,$even)"></span>
+                        </div>
+                    </div>
+                </div>
+                &lt;!&ndash; <div class="d-item double-line square-icon clearfix active">
+                        <div class="copy pull-right">
+                            <span class="text-primary title ellipsis pull-left">Item Title</span>
+                            <span class="title ellipsis pull-left">Action Type</span>
+
+                            <div class="pull-right">
+                                <span class="btn-icon btn-delete-icon btn-danger"></span>
+                            </div>
+                        </div>
+                    </div>&ndash;&gt;
             </div>
         </div>
     </div>
@@ -133,5 +239,5 @@
         </div>
     </div>
 </div>
-</body>
+</body>-->
 </html>
