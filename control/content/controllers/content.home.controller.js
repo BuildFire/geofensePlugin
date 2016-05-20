@@ -19,7 +19,7 @@
                         title: '',
                         actionToPerform: {},
                         epicenter: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 2000 //in meters
+                        radius: 10 //in miles
                     }
                 };
                 ContentHome.masterGeoAction = {
@@ -27,7 +27,7 @@
                         title: '',
                         actionToPerform: {},
                         epicente: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 2000 //in meters
+                        radius: 10 //in miles
                     }
                 };
 
