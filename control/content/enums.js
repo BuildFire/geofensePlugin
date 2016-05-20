@@ -27,7 +27,7 @@
                     title: '',
                     actionToPerform: {},
                     epicenter: {address: '', coordinates: {lat: '', long: ''}},
-                    radius: 1000 //in meters
+                    radius: 2000 //in meters
                 }
             }
         });

@@ -19,15 +19,15 @@
                         title: '',
                         actionToPerform: {},
                         epicenter: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 1000 //in meters
+                        radius: 2000 //in meters
                     }
                 };
                 ContentHome.masterGeoAction = {
                     data: {
                         title: '',
                         actionToPerform: {},
-                        epicenter: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 1000 //in meters
+                        epicente: {address: '', coordinates: {lat: '', long: ''}},
+                        radius: 2000 //in meters
                     }
                 };
 
@@ -208,6 +208,14 @@
 
                         Modals.removePopupModal({title: '', event: $event}).then(function (result) {
                             if (result) {
+                                if(item.id==ContentHome.geoAction.id){
+                                    ContentHome.geoAction=DEFAULT_DATA.GEO_ACTION;
+                                    ContentHome.selectedLocation = '';
+                                    ContentHome.center = {
+                                        lat: '',
+                                        lng: ''
+                                    }
+                                }
                                 GeoActions.delete(item.id).then(function (data) {
                                     ContentHome.items.splice(index, 1);
                                 }, function (err) {
