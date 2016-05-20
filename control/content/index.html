@@ -8,6 +8,7 @@
 
     <!--SDK js-->
     <script src="../../../../scripts/buildfire.js"></script>
+    <script src="../../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
     <script src="../../../../scripts/angular/angular-animate.min.js"></script>
     <script src="../../../../scripts/angular/ui-bootstrap.min.js"></script>
@@ -17,6 +18,7 @@
     <script src="services.js"></script>
     <script src="app.js"></script>
     <script src="directives.js"></script>
+    <script src="modals.js"></script>
     <script src="assets/js/ng-infinite-scroll.js"></script>
 
     <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>-->
@@ -43,7 +45,7 @@
                         <span class="title ellipsis pull-left">Action Type</span>
 
                         <div class="pull-right">
-                            <span class="btn-icon btn-delete-icon btn-danger"></span>
+                            <span class="btn-icon btn-delete-icon btn-danger" ng-click="ContentHome.removeListItem($index,$even)"></span>
                         </div>
                     </div>
                 </div>

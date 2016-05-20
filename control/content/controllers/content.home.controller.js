@@ -3,8 +3,8 @@
 (function (angular) {
     angular
         .module('geoFencePluginContent')
-        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB',
-            function ($scope, $timeout, Utils, COLLECTIONS, DB) {
+        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB','Modals',
+            function ($scope, $timeout, Utils, COLLECTIONS, DB,Modals) {
                 console.log('--------ContentHomeCtrl Controller Loaded-----');
                 var ContentHome = this;
                 var _skip = 0,
@@ -160,6 +160,38 @@
                     }, function fail() {
                         ContentHome.isBusy = false;
                     });
+                };
+
+
+
+                /**
+                 * ContentHome.removeListItem() used to delete an item from section list
+                 * @param index tells the index of item to be deleted.
+                 */
+                ContentHome.removeListItem = function (index, $event) {
+
+                    if ("undefined" == typeof index) {
+                        return;
+                    }
+                    var item = ContentHome.items[index];
+                    if ("undefined" !== typeof item) {
+                        //buildfire.navigation.scrollTop();
+
+                        Modals.removePopupModal({title: '', event: $event}).then(function (result) {
+                            if (result) {
+                                GeoActions.delete(item.id).then(function (data) {
+                                    ContentHome.items.splice(index, 1);
+                                }, function (err) {
+                                    console.error('Error while deleting an item-----', err);
+                                });
+                            }
+                            else {
+                                console.info('Unable to load data.');
+                            }
+                        }, function (cancelData) {
+                            //do something on cancel
+                        });
+                    }
                 };
 
 
