@@ -262,11 +262,14 @@
                             //console.log('Error while updating data---', err);
                         });
                     }
-                    else if (!isNewItemInserted) {
+                   // else if (!isNewItemInserted) {
+                    else{
                         isNewItemInserted = true;
                         GeoActions.insert(_item.data).then(function (data) {
                             ContentHome.geoAction = data;
+                            ContentHome.items.push(data);
                             updateMasterItem(data);
+                            updating = false;
                             console.log('new ---------------- Item inserted-------------------------------', data);
                             //updateMasterItem(ContentItem.item);
 
