@@ -7,6 +7,13 @@
             function ($scope, $timeout, Utils, COLLECTIONS, DB) {
                 console.log('--------ContentHomeCtrl Controller Loaded-----');
                 var ContentHome = this;
+                var _skip = 0,
+                    _limit = 10;
+                var searchOptions = {
+                    filter: {"$json.title": {"$regex": '/*'}},
+                    skip: _skip,
+                    limit: _limit + 1 // the plus one is to check if there are any more
+                };
                 ContentHome.geoAction = {
                     data: {
 
@@ -125,6 +132,38 @@
 
 
                 /**
+                 * ContentHome.noMore tells if all data has been loaded
+                 */
+                ContentHome.noMore = false;
+
+                ContentHome.isBusy = false;
+                /**
+                 * ContentHome.getMore is used to load the items
+                 */
+                ContentHome.getMore = function () {
+                    if (ContentHome.isBusy && !ContentHome.noMore) {
+                        return;
+                    }
+                    ContentHome.isBusy = true;
+                    GeoActions.find(searchOptions).then(function success(result) {
+                        if (result.length <= _limit) {// to indicate there are more
+                            ContentHome.noMore = true;
+                        }
+                        else {
+                            result.pop();
+                            searchOptions.skip = searchOptions.skip + _limit;
+                            ContentHome.noMore = false;
+                        }
+                        ContentHome.items = ContentHome.items ? ContentHome.items.concat(result) : result;
+                        console.log('items>>>', angular.copy(ContentHome.items));
+                        ContentHome.isBusy = false;
+                    }, function fail() {
+                        ContentHome.isBusy = false;
+                    });
+                };
+
+
+                /**
                  * This updateMasterItem will update the ContentMedia.masterItem with passed item
                  * @param item
                  */
@@ -154,7 +193,7 @@
                     updating = true;
                     if (_item.id) {
                         GeoActions.update(_item.id, _item.data).then(function (data) {
-                            console.log('Item updated successfully----------------',data);
+                            console.log('Item updated successfully----------------', data);
                             updating = false;
                         }, function (err) {
                             updating = false;
@@ -164,7 +203,7 @@
                     else if (!isNewItemInserted) {
                         isNewItemInserted = true;
                         GeoActions.insert(_item.data).then(function (data) {
-                            ContentHome.geoAction=data;
+                            ContentHome.geoAction = data;
                             updateMasterItem(data);
                             console.log('new ---------------- Item inserted-------------------------------', data);
                             //updateMasterItem(ContentItem.item);

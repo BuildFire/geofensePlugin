@@ -7,7 +7,8 @@
             'geoFenceServices',
             'geoFenceEnums',
             'ngAnimate',
-            'ui.bootstrap'
+            'ui.bootstrap',
+            'infinite-scroll'
 
         ])
         //injected ui.bootstrap for angular bootstrap component
