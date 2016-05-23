@@ -54,6 +54,7 @@
 
 
                     attrs.$observe('googleMap', redrawTheCircle);
+                    attrs.$observe('googleMapRadius', redrawTheCircle);
 
 
                     /*scope.$observe()$watch(function () {
@@ -62,6 +63,8 @@
 
                     function redrawTheCircle(newVal, oldVal) {
                         console.log('GoogleMap---------------------------', newVal, oldVal);
+                        console.log('scope.ContentHome.geoAction-------------in directive ------',scope.ContentHome.geoAction);
+                        var radiusInMeters=(((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 )< 3.048 ? 3.048 :(parseFloat(scope.ContentHome.geoAction.data.radius) || 10) * 1609.34;
                         if (circle)
                             circle.setMap(null);
                         circle = new google.maps.Circle({
