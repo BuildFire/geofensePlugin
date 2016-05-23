@@ -154,12 +154,14 @@
 
 
                 ContentHome.addNewItem = function () {
-                    ContentHome.geoAction = DEFAULT_DATA.GEO_ACTION;
+                    ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
                     ContentHome.selectedLocation = '';
                     ContentHome.center = {
                         lat: '',
                         lng: ''
-                    }
+                    };
+                    ContentHome.radiusMiles=10;
+                    ContentHome.radiusFeet=0;
                 };
 
 
@@ -218,12 +220,14 @@
                         Modals.removePopupModal({title: '', event: $event}).then(function (result) {
                             if (result) {
                                 if(item.id==ContentHome.geoAction.id){
-                                    ContentHome.geoAction=DEFAULT_DATA.GEO_ACTION;
+                                    ContentHome.geoAction=angular.copy(DEFAULT_DATA.GEO_ACTION);
                                     ContentHome.selectedLocation = '';
                                     ContentHome.center = {
                                         lat: '',
                                         lng: ''
-                                    }
+                                    };
+                                    ContentHome.radiusMiles=10;
+                                    ContentHome.radiusFeet=0;
                                 }
                                 GeoActions.delete(item.id).then(function (data) {
                                     ContentHome.items.splice(index, 1);
