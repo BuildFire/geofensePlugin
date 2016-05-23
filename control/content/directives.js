@@ -61,10 +61,9 @@
                      return scope.ContentHome.center;
                      }, redrawTheCircle, true);*/
 
-                    function redrawTheCircle(newVal, oldVal) {
-                        console.log('GoogleMap---------------------------', newVal, oldVal);
+                    function calculateRadius(){
+                        console.log('calculateRadius-------------function ------------');
                         var radiusInMeters;
-                        console.log('scope.ContentHome.geoAction-------------in directive ------',scope.ContentHome.geoAction);
                         if((((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 < 3.048) ){
                             radiusInMeters= 3.048;
                             scope.ContentHome.geoAction.data.radius=3.048/1609.34;
@@ -72,6 +71,12 @@
                         else{
                             radiusInMeters=((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34;
                         }
+                        return radiusInMeters;
+                    }
+
+                    function redrawTheCircle(newVal, oldVal) {
+                        console.log('GoogleMap---------------------------', newVal, oldVal);
+                        console.log('scope.ContentHome.geoAction-------------in directive ------',scope.ContentHome.geoAction);
 
                         if (circle)
                             circle.setMap(null);
@@ -83,7 +88,7 @@
                             fillOpacity: 0.35,
                             map: map,
                             center: (scope.ContentHome.center && scope.ContentHome.center.lat && scope.ContentHome.center.lng && scope.ContentHome.center) || ({"lat":32.715738,"lng":-117.16108380000003}),
-                            radius: radiusInMeters,
+                            radius: calculateRadius(),
                             editable: true
                         });
                         if (map && circle)
