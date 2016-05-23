@@ -67,11 +67,23 @@
                         if((((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 < 3.048) ){
                             radiusInMeters= 3.048;
                             scope.ContentHome.geoAction.data.radius=3.048/1609.34;
+                            calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
                         }
                         else{
                             radiusInMeters=((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34;
                         }
                         return radiusInMeters;
+                    }
+
+                    function calculateRadiusInMilesAndFeet(radiusInMiles){
+                        scope.ContentHome.radiusMiles=parseInt(radiusInMiles);
+                        if(scope.ContentHome.radiusMiles){
+                            scope.ContentHome.radiusFeet=parseInt((parseFloat(radiusInMiles)%scope.ContentHome.radiusMiles)*5280);
+                        }
+                        else{
+                            scope.ContentHome.radiusFeet=parseInt(parseFloat(radiusInMiles)*5280);
+                        }
+                        console.log('calculateRadiusInMilesAndFeet---------------',radiusInMiles,scope.ContentHome.radiusMiles,scope.ContentHome.radiusFeet);
                     }
 
                     function redrawTheCircle(newVal, oldVal) {
@@ -97,6 +109,7 @@
                             scope.$apply(function () {
                                 console.log('radius--------------------', circle.getRadius());
                                 scope.ContentHome.geoAction.data.radius = (circle.getRadius()/1609.34);
+                                calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
                                 console.log('scope.ContentHome.geoAction-----------------',scope.ContentHome.geoAction);
                             });
                             console.log('City Circle Event called');

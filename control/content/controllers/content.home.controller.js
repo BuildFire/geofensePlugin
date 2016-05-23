@@ -14,6 +14,8 @@
                     skip: _skip,
                     limit: _limit + 1 // the plus one is to check if there are any more
                 };
+                ContentHome.radiusMiles=10;
+                ContentHome.radiusFeet=0;
                 ContentHome.geoAction = {
                     data: {
                         title: '',
@@ -190,6 +192,13 @@
                     }, function fail() {
                         ContentHome.isBusy = false;
                     });
+                };
+
+
+                ContentHome.updateRadius=function(){
+                    console.log('updateRadius=============method called---------',ContentHome.radiusMiles,ContentHome.radiusFeet);
+                    ContentHome.geoAction.data.radius= parseInt(ContentHome.radiusMiles)+parseFloat(ContentHome.radiusFeet/5280);
+                    console.log('ContentHome.geoAction.data.radius------------in updateRadius method------',ContentHome.geoAction.data.radius);
                 };
 
 
