@@ -63,8 +63,16 @@
 
                     function redrawTheCircle(newVal, oldVal) {
                         console.log('GoogleMap---------------------------', newVal, oldVal);
+                        var radiusInMeters;
                         console.log('scope.ContentHome.geoAction-------------in directive ------',scope.ContentHome.geoAction);
-                        var radiusInMeters=(((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 )< 3.048 ? 3.048 :(parseFloat(scope.ContentHome.geoAction.data.radius) || 10) * 1609.34;
+                        if((((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 < 3.048) ){
+                            radiusInMeters= 3.048;
+                            scope.ContentHome.geoAction.data.radius=3.048/1609.34;
+                        }
+                        else{
+                            radiusInMeters=((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34;
+                        }
+
                         if (circle)
                             circle.setMap(null);
                         circle = new google.maps.Circle({
@@ -75,7 +83,7 @@
                             fillOpacity: 0.35,
                             map: map,
                             center: (scope.ContentHome.center && scope.ContentHome.center.lat && scope.ContentHome.center.lng && scope.ContentHome.center) || ({"lat":32.715738,"lng":-117.16108380000003}),
-                            radius: ((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseInt(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34,
+                            radius: radiusInMeters,
                             editable: true
                         });
                         if (map && circle)
