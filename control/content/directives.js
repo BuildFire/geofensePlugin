@@ -1,4 +1,4 @@
-(function (angular, buildfire) {
+(function (angular) {
     "use strict";
     angular
         .module('geoFencePluginContent')
@@ -15,7 +15,6 @@
                         var location = autocomplete.getPlace().formatted_address;
                         if (autocomplete.getPlace().geometry) {
                             var coordinates = [autocomplete.getPlace().geometry.location.lng(), autocomplete.getPlace().geometry.location.lat()];
-                            console.log('scope.setLocationInController-------in directive-------', location, coordinates);
                             scope.setLocationInController({
                                 data: {
                                     location: location,
@@ -41,7 +40,6 @@
                     attrs.$observe('googleMapRadius', redrawTheCircle);
 
                     function calculateRadius(){
-                        console.log('calculateRadius-------------function ------------');
                         var radiusInMeters;
                         if((((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 < 3.048) ){
                             radiusInMeters= 3.048;
@@ -62,13 +60,9 @@
                         else{
                             scope.ContentHome.radiusFeet=parseInt(parseFloat(radiusInMiles)*5280);
                         }
-                        console.log('calculateRadiusInMilesAndFeet---------------',radiusInMiles,scope.ContentHome.radiusMiles,scope.ContentHome.radiusFeet);
                     }
 
                     function redrawTheCircle(newVal, oldVal) {
-                        console.log('GoogleMap---------------------------', newVal, oldVal);
-                        console.log('scope.ContentHome.geoAction-------------in directive ------',scope.ContentHome.geoAction);
-
                         if (circle)
                             circle.setMap(null);
                         circle = new google.maps.Circle({
@@ -86,16 +80,14 @@
                             map.panTo(circle.getCenter());
                         circle.addListener('radius_changed', function () {
                             scope.$apply(function () {
-                                console.log('radius--------------------', circle.getRadius());
                                 scope.ContentHome.geoAction.data.radius = (circle.getRadius()/1609.34);
                                 calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
-                                console.log('scope.ContentHome.geoAction-----------------',scope.ContentHome.geoAction);
                             });
-                            console.log('City Circle Event called');
+                            console.info('Circle radius_changed Event called');
                         });
                         circle.addListener('center_changed', function () {
                             var newCenter = circle.getCenter();
-                            console.log('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
+                            console.info('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
                             scope.ContentHome.center = {lat: newCenter.lat(), lng: newCenter.lng()};
                             scope.$apply(function(){
                                 scope.ContentHome.selectedLocation=newCenter.lat()+','+newCenter.lng();
@@ -104,9 +96,7 @@
                             });
                             map.panTo(circle.getCenter());
                         });
-                        console.log('cenetr changed-----------------------------------------------', scope.ContentHome.center);
                     }
-
                 }
             }
         }])
@@ -127,4 +117,4 @@
                 });
             };
         })
-})(window.angular, buildfire);
+})(window.angular);
