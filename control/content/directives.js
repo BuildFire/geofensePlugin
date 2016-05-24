@@ -30,36 +30,15 @@
         .directive("googleMap", ['$timeout', function ($timeout) {
             return {
                 template: "<div></div>",
-                /*replace: true,
-                 scope: {coordinates: '=', draggedGeoData: '&draggedFn'},*/
                 link: function (scope, elem, attrs) {
                     var circle;
-
-                    buildfire.geo.getCurrentPosition(function (err, data) {
-                        console.log('getCurrentPosition data------', data, 'getCurrentPosition----err-----', err);
-                    });
-
-                    console.log('elem--------------------------------directive---', elem);
-                    console.log('attrs--------------------------------directive---', attrs);
-                    console.log('scope--------------------------------directive---', scope);
-
                     var map = new google.maps.Map(elem[0], {
                         zoom: 9,
                         center: {lat: 37.090, lng: -95.712}
                     });
 
-                    // Construct the circle for each value in citymap.
-                    // Note: We scale the area of the circle based on the population.
-                    // Add the circle for this city to the map.
-
-
                     attrs.$observe('googleMap', redrawTheCircle);
                     attrs.$observe('googleMapRadius', redrawTheCircle);
-
-
-                    /*scope.$observe()$watch(function () {
-                     return scope.ContentHome.center;
-                     }, redrawTheCircle, true);*/
 
                     function calculateRadius(){
                         console.log('calculateRadius-------------function ------------');
@@ -113,11 +92,7 @@
                                 console.log('scope.ContentHome.geoAction-----------------',scope.ContentHome.geoAction);
                             });
                             console.log('City Circle Event called');
-                            alert(circle.getRadius());
                         });
-                        /* $timeout(function(){
-                         circle.setMap(null);
-                         },5000);*/
                         circle.addListener('center_changed', function () {
                             var newCenter = circle.getCenter();
                             console.log('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
@@ -128,7 +103,6 @@
                                 scope.ContentHome.geoAction.data.epicenter.coordinates=scope.ContentHome.center;
                             });
                             map.panTo(circle.getCenter());
-                            alert(circle.getRadius());
                         });
                         console.log('cenetr changed-----------------------------------------------', scope.ContentHome.center);
                     }
