@@ -181,7 +181,7 @@
                             });
                     }
                     else {
-                        deferred.resolve(null);
+                        deferred.reject({message:'InValid Coordinates'});
                     }
                     return deferred.promise;
                 },

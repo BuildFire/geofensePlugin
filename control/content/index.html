@@ -98,6 +98,15 @@
                        ng-change="ContentHome.clearData()">
             </div>
         </div>
+        <hr class="none" ng-show="ContentHome.validCopyAddressFailure || ContentHome.validCoordinatesFailure">
+        <div class="alert alert-danger alert-sm text-center"
+             ng-show="ContentHome.validCopyAddressFailure">Please enter valid
+            address
+        </div>
+        <div class="alert alert-danger alert-sm text-center"
+             ng-show="ContentHome.validCoordinatesFailure">Please enter valid
+            coordinates
+        </div>
         <hr class="none">
         <div class="item clearfix row">
             <div class="labels col-xs-3 pull-left">

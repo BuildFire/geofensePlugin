@@ -23,15 +23,15 @@
 
                 };
 
-                function calculateRadiusInMilesAndFeet(radiusInMiles){
-                    ContentHome.radiusMiles=parseInt(radiusInMiles);
-                    if(ContentHome.radiusMiles){
-                        ContentHome.radiusFeet=parseInt((parseFloat(radiusInMiles)%ContentHome.radiusMiles)*5280);
+                function calculateRadiusInMilesAndFeet(radiusInMiles) {
+                    ContentHome.radiusMiles = parseInt(radiusInMiles);
+                    if (ContentHome.radiusMiles) {
+                        ContentHome.radiusFeet = parseInt((parseFloat(radiusInMiles) % ContentHome.radiusMiles) * 5280);
                     }
-                    else{
-                        ContentHome.radiusFeet=parseInt(parseFloat(radiusInMiles)*5280);
+                    else {
+                        ContentHome.radiusFeet = parseInt(parseFloat(radiusInMiles) * 5280);
                     }
-                    console.log('calculateRadiusInMilesAndFeet------ In controller---------',radiusInMiles,ContentHome.radiusMiles,ContentHome.radiusFeet);
+                    console.log('calculateRadiusInMilesAndFeet------ In controller---------', radiusInMiles, ContentHome.radiusMiles, ContentHome.radiusFeet);
                 }
 
                 ContentHome.setLocation = function (data) {
@@ -47,33 +47,41 @@
                     $scope.$digest();
                 };
 
+                function errorAddress() {
+                    console.error('error invalid Address');
+                    ContentHome.validCopyAddressFailure = true;
+                    $timeout(function () {
+                        ContentHome.validCopyAddressFailure = false;
+                    }, 5000);
+
+                }
+
+                function errorCoordinates(err) {
+                    console.error('Error while validating coordinates------------', err);
+                    ContentHome.validCoordinatesFailure = true;
+                    $timeout(function () {
+                        ContentHome.validCoordinatesFailure = false;
+                    }, 5000);
+                }
+
+                function successSetCordinates(resp) {
+                    if (resp) {
+                        ContentHome.center = {
+                            lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
+                            lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
+                        };
+                    } else {
+                        console.log('coordinates validated successfully but no data recieved');
+                    }
+                }
+
 
                 ContentHome.setCoordinates = function () {
                     var latlng = '';
-                    function successCallback(resp) {
-                        if (resp) {
-                            ContentHome.center = {
-                                lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
-                                lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
-                            };
-                        } else {
-                            console.log('coordinates validated successfully but no data recieved');
-                        }
-                    }
-
-                    function errorCallback(err) {
-                        console.error('Error while validating coordinates------------', err);
-                        ContentHome.validCoordinatesFailure = true;
-                        $timeout(function () {
-                            ContentHome.validCoordinatesFailure = false;
-                        }, 5000);
-                    }
-
                     if (ContentHome.selectedLocation) {
                         latlng = ContentHome.selectedLocation.split(',')[1] + "," + ContentHome.selectedLocation.split(',')[0]
                     }
-
-                    Utils.validLongLats(latlng).then(successCallback, errorCallback);
+                    Utils.validLongLats(latlng).then(successSetCordinates, errorCoordinates);
                 };
                 ContentHome.clearData = function () {
                     if (!ContentHome.selectedLocation) {
@@ -90,7 +98,7 @@
                             var firstResult = $(".pac-container .pac-item:first").find('.pac-matched').map(function () {
                                 return $(this).text();
                             }).get().join(); // + ', ' + $(".pac-container .pac-item:first").find('span:last').text();
-                            console.log('firstResult', firstResult);
+                            console.log('got ---- firstResult', firstResult);
                             var geocoder = new google.maps.Geocoder();
                             geocoder.geocode({"address": firstResult}, function (results, status) {
                                 if (status == google.maps.GeocoderStatus.OK) {
@@ -107,10 +115,11 @@
                                 }
                             });
                         }
-                        else if (ContentHome.selectedLocation && (ContentHome.selectedLocation.split(',').length==2)) {
+                        else if (ContentHome.selectedLocation && (ContentHome.selectedLocation.split(',').length == 2)) {
                             ContentHome.setCoordinates();
                         }
                         else {
+                            errorAddress();
                             console.error('InValid Input');
                         }
                     }, 1000);
@@ -144,7 +153,7 @@
                         return;
                     }
                     ContentHome.isBusy = true;
-                    GeoActions.find(searchOptions).then(function success(result) {
+                    GeoActions.find(searchOptions).then(function (result) {
                         if (result.length <= _limit) {// to indicate there are more
                             ContentHome.noMore = true;
                         }
@@ -156,7 +165,7 @@
                         ContentHome.items = ContentHome.items ? ContentHome.items.concat(result) : result;
                         console.log('items----------------->>>', angular.copy(ContentHome.items));
                         ContentHome.isBusy = false;
-                    }, function fail() {
+                    }, function () {
                         ContentHome.isBusy = false;
                     });
                 };
@@ -310,6 +319,8 @@
                     ContentHome.center = {};
                     ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
                     ContentHome.masterGeoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                    ContentHome.validCopyAddressFailure = false;
+                    ContentHome.validCoordinatesFailure = false;
                 }
 
                 init();
