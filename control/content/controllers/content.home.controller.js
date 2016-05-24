@@ -7,31 +7,7 @@
             function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA) {
                 console.log('--------ContentHomeCtrl Controller Loaded-----');
                 var ContentHome = this;
-                var _skip = 0,
-                    _limit = 10;
-                var searchOptions = {
-                    filter: {"$json.title": {"$regex": '/*'}},
-                    skip: _skip,
-                    limit: _limit + 1 // the plus one is to check if there are any more
-                };
-                ContentHome.radiusMiles=10;
-                ContentHome.radiusFeet=0;
-                ContentHome.geoAction = {
-                    data: {
-                        title: '',
-                        actionToPerform: {},
-                        epicenter: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 10 //in miles
-                    }
-                };
-                ContentHome.masterGeoAction = {
-                    data: {
-                        title: '',
-                        actionToPerform: {},
-                        epicente: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 10 //in miles
-                    }
-                };
+                var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
 
                 ContentHome.selectItem = function (item) {
                     console.log('selectItem method called-------------------', item);
@@ -45,12 +21,6 @@
                     }
 
                 };
-
-                var tmrDelayForItem = null
-                    , GeoActions = new DB(COLLECTIONS.GeoActions)
-                    , updating = false
-                    , isNewItemInserted = false;
-                ContentHome.center = {};
 
                 ContentHome.setLocation = function (data) {
                     console.log('SetLoaction caleed-------------------', data);
@@ -68,16 +38,14 @@
 
                 ContentHome.setCoordinates = function () {
                     var latlng = '';
-                    console.log('ng-enter---------------------called-----ContentHome.selectedLocation-------------', ContentHome.selectedLocation);
                     function successCallback(resp) {
-                        console.error('Successfully validated coordinates-----------', resp);
                         if (resp) {
                             ContentHome.center = {
                                 lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
                                 lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
                             };
                         } else {
-                            //errorCallback();
+                            console.log('coordinates validated successfully but no data recieved');
                         }
                     }
 
@@ -104,20 +72,8 @@
                     }
                 };
 
-                ContentHome.validCopyAddressFailure = false;
                 ContentHome.locationAutocompletePaste = function () {
-                    function error() {
-                        console.error('ERROOR emethpdd called');
-                        ContentHome.validCopyAddressFailure = true;
-                        $timeout(function () {
-                            ContentHome.validCopyAddressFailure = false;
-                        }, 5000);
-
-                    }
-
                     $timeout(function () {
-                        console.log('val>>>', $("#googleMapAutocomplete").val());
-                        console.log('.pac-container .pac-item', $(".pac-container .pac-item").length);
                         if ($(".pac-container .pac-item").length) {
                             var firstResult = $(".pac-container .pac-item:first").find('.pac-matched').map(function () {
                                 return $(this).text();
@@ -135,18 +91,15 @@
                                     $("#googleMapAutocomplete").blur();
                                 }
                                 else {
-                                    console.error('' +
-                                        'Error else parts of google');
-                                    error();
+                                    console.error('--lat long does not find-- corresponding to input');
                                 }
                             });
                         }
-                        else if (ContentHome.selectedLocation && ContentHome.selectedLocation.split(',').length) {
-                            console.log('Location found---------selectedLocation------------', ContentHome.selectedLocation.split(',').length, ContentHome.selectedLocation.split(','));
+                        else if (ContentHome.selectedLocation && (ContentHome.selectedLocation.split(',').length==2)) {
                             ContentHome.setCoordinates();
                         }
                         else {
-                            error();
+                            console.error('InValid Input');
                         }
                     }, 1000);
 
@@ -160,8 +113,8 @@
                         lat: '',
                         lng: ''
                     };
-                    ContentHome.radiusMiles=10;
-                    ContentHome.radiusFeet=0;
+                    ContentHome.radiusMiles = 10;
+                    ContentHome.radiusFeet = 0;
                 };
 
 
@@ -189,7 +142,7 @@
                             ContentHome.noMore = false;
                         }
                         ContentHome.items = ContentHome.items ? ContentHome.items.concat(result) : result;
-                        console.log('items>>>', angular.copy(ContentHome.items));
+                        console.log('items----------------->>>', angular.copy(ContentHome.items));
                         ContentHome.isBusy = false;
                     }, function fail() {
                         ContentHome.isBusy = false;
@@ -197,37 +150,35 @@
                 };
 
 
-                ContentHome.updateRadius=function(){
-                    console.log('updateRadius=============method called---------',ContentHome.radiusMiles,ContentHome.radiusFeet);
-                    ContentHome.geoAction.data.radius= parseInt(ContentHome.radiusMiles)+parseFloat(ContentHome.radiusFeet/5280);
-                    console.log('ContentHome.geoAction.data.radius------------in updateRadius method------',ContentHome.geoAction.data.radius);
+                ContentHome.updateRadius = function () {
+                    ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
 
 
                 /**
                  * ContentHome.removeListItem() used to delete an item from section list
-                 * @param index tells the index of item to be deleted.
+                 * @param index
+                 * @param event
                  */
-                ContentHome.removeListItem = function (index, $event) {
+                ContentHome.removeListItem = function (index, event) {
 
                     if ("undefined" == typeof index) {
                         return;
                     }
                     var item = ContentHome.items[index];
                     if ("undefined" !== typeof item) {
-                        //buildfire.navigation.scrollTop();
 
-                        Modals.removePopupModal({title: '', event: $event}).then(function (result) {
+                        Modals.removePopupModal({event: event1}).then(function (result) {
                             if (result) {
-                                if(item.id==ContentHome.geoAction.id){
-                                    ContentHome.geoAction=angular.copy(DEFAULT_DATA.GEO_ACTION);
+                                if (item.id == ContentHome.geoAction.id) {
+                                    ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
                                     ContentHome.selectedLocation = '';
                                     ContentHome.center = {
                                         lat: '',
                                         lng: ''
                                     };
-                                    ContentHome.radiusMiles=10;
-                                    ContentHome.radiusFeet=0;
+                                    ContentHome.radiusMiles = 10;
+                                    ContentHome.radiusFeet = 0;
                                 }
                                 GeoActions.delete(item.id).then(function (data) {
                                     ContentHome.items.splice(index, 1);
@@ -280,25 +231,21 @@
                             updating = false;
                         }, function (err) {
                             updating = false;
-                            //console.log('Error while updating data---', err);
+                            resetItem();
+                            console.error('Error while inserting an item data---', err);
                         });
                     }
-                   // else if (!isNewItemInserted) {
-                    else{
-                        isNewItemInserted = true;
+                    else {
                         GeoActions.insert(_item.data).then(function (data) {
                             ContentHome.geoAction = data;
                             ContentHome.items.push(data);
                             updateMasterItem(data);
                             updating = false;
                             console.log('new ---------------- Item inserted-------------------------------', data);
-                            //updateMasterItem(ContentItem.item);
-
-
                         }, function (err) {
-                            //resetItem();
+                            console.error('Error while updating an item data---', err);
+                            resetItem();
                             updating = false;
-                            //isNewItemInserted = false;
                         });
                     }
                 }
@@ -330,6 +277,30 @@
                 $scope.$watch(function () {
                     return ContentHome.geoAction;
                 }, updateItemsWithDelay, true);
+
+                /**
+                 * initialization of variables
+                 */
+                function init() {
+
+                    _skip = 0;
+                    _limit = 10;
+                    searchOptions = {
+                        filter: {"$json.title": {"$regex": '/*'}},
+                        skip: _skip,
+                        limit: _limit + 1 // the plus one is to check if there are any more
+                    };
+                    tmrDelayForItem = null;
+                    GeoActions = new DB(COLLECTIONS.GeoActions);
+                    updating = false;
+                    ContentHome.radiusMiles = 10;
+                    ContentHome.radiusFeet = 0;
+                    ContentHome.center = {};
+                    ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                    ContentHome.masterGeoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                }
+
+                init();
 
             }]);
 })(window.angular);
