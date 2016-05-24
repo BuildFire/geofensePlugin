@@ -40,23 +40,23 @@ describe('geoFenceModals: Services', function () {
             })
         );
         it('$scope should exists', function () {
-            expect($scope).toBeDefined();
+            expect(RemovePopup).toBeDefined();
         });
         it('$scope.cancel should exists', function () {
-            expect($scope.cancel).toBeDefined();
+            expect(RemovePopup.cancel).toBeDefined();
         });
         it('$scope.ok should exists', function () {
-            expect($scope.ok).toBeDefined();
+            expect(RemovePopup.ok).toBeDefined();
         });
         it('$scope.cancel should exists', function () {
-            expect($scope.cancel).toBeDefined();
+            expect(RemovePopup.cancel).toBeDefined();
         });
         it('$scope.ok should close modalInstance', function () {
-            $scope.ok();
+            RemovePopup.ok();
             expect(modalInstance.close).toHaveBeenCalledWith('yes');
         });
         it('$scope.ok should dismiss modalInstance', function () {
-            $scope.cancel();
+            RemovePopup.cancel();
             expect(modalInstance.dismiss).toHaveBeenCalledWith('no');
         });
     });
