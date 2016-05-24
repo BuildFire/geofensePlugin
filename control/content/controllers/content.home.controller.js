@@ -14,6 +14,7 @@
                     if (item && item.data) {
                         ContentHome.geoAction = item;
                         updateMasterItem(item);
+                        calculateRadiusInMilesAndFeet(item.data.radius);
                         if (item.data.epicenter && item.data.epicenter.coordinates) {
                             ContentHome.center = item.data.epicenter.coordinates;
                             ContentHome.selectedLocation = item.data.epicenter.address;
@@ -21,6 +22,17 @@
                     }
 
                 };
+
+                function calculateRadiusInMilesAndFeet(radiusInMiles){
+                    ContentHome.radiusMiles=parseInt(radiusInMiles);
+                    if(ContentHome.radiusMiles){
+                        ContentHome.radiusFeet=parseInt((parseFloat(radiusInMiles)%ContentHome.radiusMiles)*5280);
+                    }
+                    else{
+                        ContentHome.radiusFeet=parseInt(parseFloat(radiusInMiles)*5280);
+                    }
+                    console.log('calculateRadiusInMilesAndFeet------ In controller---------',radiusInMiles,ContentHome.radiusMiles,ContentHome.radiusFeet);
+                }
 
                 ContentHome.setLocation = function (data) {
                     console.log('SetLoaction caleed-------------------', data);
