@@ -32,16 +32,15 @@
             };
         }])
         .controller('RemovePopupCtrl', ['$scope', '$modalInstance', 'Info','$timeout', function ($scope, $modalInstance, Info,$timeout) {
-            console.log('RemovePopup Controller called-----');
+           var RemovePopup=this;
             $timeout(function () {
-                console.log('Modal Top Changed');
                 var top =  Info.event.pageY-50;
                 $('.modal-dialog.modal-sm').offset({top: top, left: 0});
             }, 700);
-            $scope.ok = function () {
+            RemovePopup.ok = function () {
                 $modalInstance.close('yes');
             };
-            $scope.cancel = function () {
+            RemovePopup.cancel = function () {
                 $modalInstance.dismiss('no');
             };
         }])

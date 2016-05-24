@@ -5,7 +5,6 @@
         .module('geoFencePluginContent')
         .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA',
             function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA) {
-                console.log('--------ContentHomeCtrl Controller Loaded-----');
                 var ContentHome = this;
                 var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
 
@@ -37,7 +36,7 @@
                     }, 5000);
                 }
 
-                function successSetCordinates(resp) {
+                function successSetCoordinates(resp) {
                     if (resp) {
                         ContentHome.center = {
                             lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
@@ -164,7 +163,7 @@
                     if (ContentHome.selectedLocation) {
                         latlng = ContentHome.selectedLocation.split(',')[1] + "," + ContentHome.selectedLocation.split(',')[0]
                     }
-                    Utils.validLongLats(latlng).then(successSetCordinates, errorCoordinates);
+                    Utils.validLongLats(latlng).then(successSetCoordinates, errorCoordinates);
                 };
 
                 ContentHome.setLocation = function (data) {
