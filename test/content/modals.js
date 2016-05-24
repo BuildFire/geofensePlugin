@@ -2,12 +2,12 @@ describe('geoFenceModals: Services', function () {
     var $modal, $q;
     beforeEach(module('geoFenceModals'));
     beforeEach(inject(function ($injector) {
-        $modal = $injector.get('$modal');
         $q = $injector.get('$q');
     }));
 
     describe('Modals service', function () {
         var Modals;
+        $modal = jasmine.createSpyObj('$modal', ['open']);
         beforeEach(inject(
             function (_Modals_) {
                 Modals = _Modals_;
@@ -17,6 +17,27 @@ describe('geoFenceModals: Services', function () {
         });
         it('Modals.removePopupModal should exists', function () {
             expect(Modals.removePopupModal).toBeDefined();
+        });
+        it('when $modal.open invoked by removePopupModal and clicked Ok', function () {
+            $modal.open.and.callFake(function (obj) {
+                var deferred = $q.defer();
+                obj.resolve.Info();
+                deferred.resolve({});
+                return {
+                    result: deferred.promise
+                };
+            });
+            Modals.removePopupModal({
+                templateUrl: 'templates/modals/rm-section-modal.html',
+                controller: 'RemovePopupCtrl',
+                controllerAs: 'RemovePopup',
+                size: 'sm',
+                resolve: {
+                    Info: function () {
+                        return {};
+                    }
+                }
+            });
         });
     });
 
@@ -31,7 +52,7 @@ describe('geoFenceModals: Services', function () {
                         then: jasmine.createSpy('modalInstance.result.then')
                     }
                 };
-                Info = {};
+                Info = {event:{}};
                 RemovePopup = $controller('RemovePopupCtrl', {
                     $scope: $scope,
                     $modalInstance: modalInstance,//_$modal_.op,

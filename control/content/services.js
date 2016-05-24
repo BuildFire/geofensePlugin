@@ -19,29 +19,16 @@
                 if (typeof items == 'undefined') {
                     return deferred.reject(new Error(MESSAGES.ERROR.DATA_NOT_DEFINED));
                 }
-                if (Array.isArray(items)) {
-                    Buildfire.datastore.bulkInsert(items, that._tagName, function (err, result) {
-                        if (err) {
-                            return deferred.reject(err);
-                        }
-                        else if (result) {
-                            return deferred.resolve(result);
-                        } else {
-                            return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                        }
-                    });
-                } else {
-                    Buildfire.datastore.insert(items, that._tagName, false, function (err, result) {
-                        if (err) {
-                            return deferred.reject(err);
-                        }
-                        else if (result) {
-                            return deferred.resolve(result);
-                        } else {
-                            return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                        }
-                    });
-                }
+                Buildfire.datastore.insert(items, that._tagName, false, function (err, result) {
+                    if (err) {
+                        return deferred.reject(err);
+                    }
+                    else if (result) {
+                        return deferred.resolve(result);
+                    } else {
+                        return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
+                    }
+                });
                 return deferred.promise;
             };
             DB.prototype.find = function (options) {
@@ -72,24 +59,6 @@
                     return deferred.reject(new Error(MESSAGES.ERROR.DATA_NOT_DEFINED));
                 }
                 Buildfire.datastore.update(id, item, that._tagName, function (err, result) {
-                    if (err) {
-                        return deferred.reject(err);
-                    }
-                    else if (result) {
-                        return deferred.resolve(result);
-                    } else {
-                        return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                    }
-                });
-                return deferred.promise;
-            };
-            DB.prototype.save = function (item) {
-                var that = this;
-                var deferred = $q.defer();
-                if (typeof item == 'undefined') {
-                    return deferred.reject(new Error(MESSAGES.ERROR.DATA_NOT_DEFINED));
-                }
-                Buildfire.datastore.save(item, that._tagName, function (err, result) {
                     if (err) {
                         return deferred.reject(err);
                     }
