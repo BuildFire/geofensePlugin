@@ -3,237 +3,61 @@
 (function (angular) {
     angular
         .module('geoFencePluginContent')
-        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA',
-            function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA) {
-                console.log('--------ContentHomeCtrl Controller Loaded-----');
+        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA', 'Buildfire',
+            function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA, Buildfire) {
                 var ContentHome = this;
-                var _skip = 0,
-                    _limit = 10;
-                var searchOptions = {
-                    filter: {"$json.title": {"$regex": '/*'}},
-                    skip: _skip,
-                    limit: _limit + 1 // the plus one is to check if there are any more
-                };
-                ContentHome.geoAction = {
-                    data: {
-                        title: '',
-                        actionToPerform: {},
-                        epicenter: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 2000 //in meters
+                var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
+
+                /**
+                 * calculateRadiusInMilesAndFeet calculates the radius in miles and feet
+                 * @param radiusInMiles
+                 */
+                function calculateRadiusInMilesAndFeet(radiusInMiles) {
+                    ContentHome.radiusMiles = parseInt(radiusInMiles);
+                    if (ContentHome.radiusMiles) {
+                        ContentHome.radiusFeet = parseInt((parseFloat(radiusInMiles) % ContentHome.radiusMiles) * 5280);
                     }
-                };
-                ContentHome.masterGeoAction = {
-                    data: {
-                        title: '',
-                        actionToPerform: {},
-                        epicente: {address: '', coordinates: {lat: '', long: ''}},
-                        radius: 2000 //in meters
+                    else {
+                        ContentHome.radiusFeet = parseInt(parseFloat(radiusInMiles) * 5280);
                     }
-                };
+                }
 
-                ContentHome.selectItem = function (item) {
-                    console.log('selectItem method called-------------------', item);
-                    if (item && item.data) {
-                        ContentHome.geoAction = item;
-                        updateMasterItem(item);
-                        if (item.data.epicenter && item.data.epicenter.coordinates) {
-                            ContentHome.center = item.data.epicenter.coordinates;
-                            ContentHome.selectedLocation = item.data.epicenter.address;
-                        }
-                    }
+                /**
+                 * errorAddress shows the error message when copied address is invalid
+                 */
+                function errorAddress() {
+                    ContentHome.validCopyAddressFailure = true;
+                    $timeout(function () {
+                        ContentHome.validCopyAddressFailure = false;
+                    }, 5000);
+                }
 
-                };
+                /**
+                 * errorCoordinates shows the error message when copied coordinates are invalid
+                 * @param err
+                 */
+                function errorCoordinates(err) {
+                    ContentHome.validCoordinatesFailure = true;
+                    $timeout(function () {
+                        ContentHome.validCoordinatesFailure = false;
+                    }, 5000);
+                }
 
-                var tmrDelayForItem = null
-                    , GeoActions = new DB(COLLECTIONS.GeoActions)
-                    , updating = false
-                    , isNewItemInserted = false;
-                ContentHome.center = {};
-
-                ContentHome.setLocation = function (data) {
-                    console.log('SetLoaction caleed-------------------', data);
-                    ContentHome.selectedLocation = data.location;
-                    ContentHome.currentCoordinates = data.coordinates;
-
-                    ContentHome.geoAction.data.epicenter.address = data.location;
-                    ContentHome.geoAction.data.epicenter.coordinates = ContentHome.center;
-
-                    ContentHome.center.lat = data.coordinates[1];
-                    ContentHome.center.lng = data.coordinates[0];
-                    $scope.$digest();
-                };
-
-
-                ContentHome.setCoordinates = function () {
-                    var latlng = '';
-                    console.log('ng-enter---------------------called-----ContentHome.selectedLocation-------------', ContentHome.selectedLocation);
-                    function successCallback(resp) {
-                        console.error('Successfully validated coordinates-----------', resp);
-                        if (resp) {
-                            ContentHome.center = {
-                                lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
-                                lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
-                            };
-                        } else {
-                            //errorCallback();
-                        }
-                    }
-
-                    function errorCallback(err) {
-                        console.error('Error while validating coordinates------------', err);
-                        ContentHome.validCoordinatesFailure = true;
-                        $timeout(function () {
-                            ContentHome.validCoordinatesFailure = false;
-                        }, 5000);
-                    }
-
-                    if (ContentHome.selectedLocation) {
-                        latlng = ContentHome.selectedLocation.split(',')[1] + "," + ContentHome.selectedLocation.split(',')[0]
-                    }
-
-                    Utils.validLongLats(latlng).then(successCallback, errorCallback);
-                };
-                ContentHome.clearData = function () {
-                    if (!ContentHome.selectedLocation) {
+                /**
+                 * successSetCoordinates sets the coordinates
+                 * @param resp
+                 */
+                function successSetCoordinates(resp) {
+                    if (resp) {
                         ContentHome.center = {
-                            lng: '',
-                            lat: ''
+                            lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
+                            lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
                         };
                     }
-                };
-
-                ContentHome.validCopyAddressFailure = false;
-                ContentHome.locationAutocompletePaste = function () {
-                    function error() {
-                        console.error('ERROOR emethpdd called');
-                        ContentHome.validCopyAddressFailure = true;
-                        $timeout(function () {
-                            ContentHome.validCopyAddressFailure = false;
-                        }, 5000);
-
-                    }
-
-                    $timeout(function () {
-                        console.log('val>>>', $("#googleMapAutocomplete").val());
-                        console.log('.pac-container .pac-item', $(".pac-container .pac-item").length);
-                        if ($(".pac-container .pac-item").length) {
-                            var firstResult = $(".pac-container .pac-item:first").find('.pac-matched').map(function () {
-                                return $(this).text();
-                            }).get().join(); // + ', ' + $(".pac-container .pac-item:first").find('span:last').text();
-                            console.log('firstResult', firstResult);
-                            var geocoder = new google.maps.Geocoder();
-                            geocoder.geocode({"address": firstResult}, function (results, status) {
-                                if (status == google.maps.GeocoderStatus.OK) {
-                                    var lat = results[0].geometry.location.lat(),
-                                        lng = results[0].geometry.location.lng();
-                                    ContentHome.geoAction.data.epicenter.address = firstResult;
-                                    ContentHome.geoAction.data.epicenter.lat = lat;
-                                    ContentHome.geoAction.data.epicenter.lng = lng;
-                                    ContentHome.center = {lat: lat, lng: lng};
-                                    $("#googleMapAutocomplete").blur();
-                                }
-                                else {
-                                    console.error('' +
-                                        'Error else parts of google');
-                                    error();
-                                }
-                            });
-                        }
-                        else if (ContentHome.selectedLocation && ContentHome.selectedLocation.split(',').length) {
-                            console.log('Location found---------selectedLocation------------', ContentHome.selectedLocation.split(',').length, ContentHome.selectedLocation.split(','));
-                            ContentHome.setCoordinates();
-                        }
-                        else {
-                            error();
-                        }
-                    }, 1000);
-
-                };
-
-
-                ContentHome.addNewItem = function () {
-                    ContentHome.geoAction = DEFAULT_DATA.GEO_ACTION;
-                    ContentHome.selectedLocation = '';
-                    ContentHome.center = {
-                        lat: '',
-                        lng: ''
-                    }
-                };
-
+                }
 
                 /**
-                 * ContentHome.noMore tells if all data has been loaded
-                 */
-                ContentHome.noMore = false;
-
-                ContentHome.isBusy = false;
-                /**
-                 * ContentHome.getMore is used to load the items
-                 */
-                ContentHome.getMore = function () {
-                    if (ContentHome.isBusy && !ContentHome.noMore) {
-                        return;
-                    }
-                    ContentHome.isBusy = true;
-                    GeoActions.find(searchOptions).then(function success(result) {
-                        if (result.length <= _limit) {// to indicate there are more
-                            ContentHome.noMore = true;
-                        }
-                        else {
-                            result.pop();
-                            searchOptions.skip = searchOptions.skip + _limit;
-                            ContentHome.noMore = false;
-                        }
-                        ContentHome.items = ContentHome.items ? ContentHome.items.concat(result) : result;
-                        console.log('items>>>', angular.copy(ContentHome.items));
-                        ContentHome.isBusy = false;
-                    }, function fail() {
-                        ContentHome.isBusy = false;
-                    });
-                };
-
-
-                /**
-                 * ContentHome.removeListItem() used to delete an item from section list
-                 * @param index tells the index of item to be deleted.
-                 */
-                ContentHome.removeListItem = function (index, $event) {
-
-                    if ("undefined" == typeof index) {
-                        return;
-                    }
-                    var item = ContentHome.items[index];
-                    if ("undefined" !== typeof item) {
-                        //buildfire.navigation.scrollTop();
-
-                        Modals.removePopupModal({title: '', event: $event}).then(function (result) {
-                            if (result) {
-                                if(item.id==ContentHome.geoAction.id){
-                                    ContentHome.geoAction=DEFAULT_DATA.GEO_ACTION;
-                                    ContentHome.selectedLocation = '';
-                                    ContentHome.center = {
-                                        lat: '',
-                                        lng: ''
-                                    }
-                                }
-                                GeoActions.delete(item.id).then(function (data) {
-                                    ContentHome.items.splice(index, 1);
-                                }, function (err) {
-                                    console.error('Error while deleting an item-----', err);
-                                });
-                            }
-                            else {
-                                console.info('Unable to load data.');
-                            }
-                        }, function (cancelData) {
-                            //do something on cancel
-                        });
-                    }
-                };
-
-
-                /**
-                 * This updateMasterItem will update the ContentMedia.masterItem with passed item
+                 * updateMasterItem will update the ContentMedia.masterItem with passed item
                  * @param item
                  */
                 function updateMasterItem(item) {
@@ -241,12 +65,11 @@
                 }
 
                 /**
-                 * This resetItem will reset the ContentMedia.item with ContentMedia.masterItem
+                 * resetItem will reset the ContentMedia.item with ContentMedia.masterItem
                  */
                 function resetItem() {
                     ContentHome.geoAction.data = angular.copy(ContentHome.masterGeoAction);
                 }
-
 
                 /**
                  * isUnChanged to check whether there is change in controller media item or not
@@ -257,44 +80,44 @@
                     return angular.equals(item, ContentHome.masterGeoAction);
                 }
 
+                /**
+                 * insertAndUpdate inserts and  updates the item
+                 * @param _item
+                 */
                 function insertAndUpdate(_item) {
-                    console.log('insertAndUpdate-----------------method called-----', _item);
                     updating = true;
                     if (_item.id) {
                         GeoActions.update(_item.id, _item.data).then(function (data) {
-                            console.log('Item updated successfully----------------', data);
                             updateMasterItem(data);
                             updating = false;
                         }, function (err) {
                             updating = false;
-                            //console.log('Error while updating data---', err);
+                            resetItem();
+                            console.error('Error while inserting an item data---', err);
                         });
                     }
-                   // else if (!isNewItemInserted) {
-                    else{
-                        isNewItemInserted = true;
+                    else {
                         GeoActions.insert(_item.data).then(function (data) {
                             ContentHome.geoAction = data;
                             ContentHome.items.push(data);
                             updateMasterItem(data);
                             updating = false;
-                            console.log('new ---------------- Item inserted-------------------------------', data);
-                            //updateMasterItem(ContentItem.item);
-
-
                         }, function (err) {
-                            //resetItem();
+                            console.error('Error while updating an item data---', err);
+                            resetItem();
                             updating = false;
-                            //isNewItemInserted = false;
                         });
                     }
                 }
 
-                //to validate the action with title
+                /**
+                 * isValidItem tells whether item is valid or not
+                 * @param action
+                 * @returns {*}
+                 */
                 function isValidItem(action) {
                     return action.data && action.data.title;
                 }
-
 
                 /**
                  * updateItemWithDelay called when ever there is some change in current geo action
@@ -314,9 +137,282 @@
                     }
                 }
 
+                /**
+                 * initialization of variables
+                 */
+                function init() {
+
+                    _skip = 0;
+                    _limit = 10;
+                    searchOptions = {
+                        filter: {"$json.title": {"$regex": '/*'}},
+                        skip: _skip,
+                        limit: _limit + 1 // the plus one is to check if there are any more
+                    };
+                    tmrDelayForItem = null;
+                    GeoActions = new DB(COLLECTIONS.GeoActions);
+                    updating = false;
+                    ContentHome.radiusMiles = 10;
+                    ContentHome.radiusFeet = 0;
+                    ContentHome.center = {};
+                    ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                    ContentHome.masterGeoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                    ContentHome.validCopyAddressFailure = false;
+                    ContentHome.validCoordinatesFailure = false;
+                    /**
+                     * ContentHome.noMore tells if all data has been loaded
+                     * @type {boolean}
+                     */
+                    ContentHome.noMore = false;
+                    /**
+                     * ContentHome.isBusy tells whether the scrolling is in progress or not.
+                     * @type {boolean}
+                     */
+                    ContentHome.isBusy = false;
+                }
+
+                /**
+                 * ContentHome.setCoordinates validates and sets the coordinates
+                 */
+                ContentHome.setCoordinates = function () {
+                    var latlng = '';
+                    if (ContentHome.selectedLocation) {
+                        latlng = ContentHome.selectedLocation.split(',')[1] + "," + ContentHome.selectedLocation.split(',')[0]
+                    }
+                    Utils.validLongLats(latlng).then(successSetCoordinates, errorCoordinates);
+                };
+
+                /**
+                 * ContentHome.setLocation sets the address and coordinates
+                 * @param data
+                 */
+                ContentHome.setLocation = function (data) {
+                    ContentHome.selectedLocation = data.location;
+                    ContentHome.currentCoordinates = data.coordinates;
+                    ContentHome.geoAction.data.epicenter.address = data.location;
+                    ContentHome.geoAction.data.epicenter.coordinates = ContentHome.center;
+                    ContentHome.center.lat = data.coordinates[1];
+                    ContentHome.center.lng = data.coordinates[0];
+                    $scope.$digest();
+                };
+
+                /**
+                 * ContentHome.clearData clears the lat/lng
+                 */
+                ContentHome.clearData = function () {
+                    if (!ContentHome.selectedLocation) {
+                        ContentHome.center = {
+                            lng: '',
+                            lat: ''
+                        };
+                    }
+                };
+
+                /**
+                 * ContentHome.locationAutocompletePaste finds the location lat/lng
+                 */
+                ContentHome.locationAutocompletePaste = function () {
+                    $timeout(function () {
+                        if ($(".pac-container .pac-item").length) {
+                            var firstResult = $(".pac-container .pac-item:first").find('.pac-matched').map(function () {
+                                return $(this).text();
+                            }).get().join();
+                            var geocoder = new google.maps.Geocoder();
+                            geocoder.geocode({"address": firstResult}, function (results, status) {
+                                if (status == google.maps.GeocoderStatus.OK) {
+                                    var lat = results[0].geometry.location.lat(),
+                                        lng = results[0].geometry.location.lng();
+                                    ContentHome.geoAction.data.epicenter.address = firstResult;
+                                    ContentHome.geoAction.data.epicenter.lat = lat;
+                                    ContentHome.geoAction.data.epicenter.lng = lng;
+                                    ContentHome.center = {lat: lat, lng: lng};
+                                    $("#googleMapAutocomplete").blur();
+                                }
+                                else {
+                                    console.error('--lat long does not find-- corresponding to input');
+                                }
+                            });
+                        }
+                        else if (ContentHome.selectedLocation && (ContentHome.selectedLocation.split(',').length == 2)) {
+                            ContentHome.setCoordinates();
+                        }
+                        else {
+                            errorAddress();
+                        }
+                    }, 1000);
+
+                };
+
+                /**
+                 *  ContentHome.addNewItem allow us to add new Item
+                 */
+                ContentHome.addNewItem = function () {
+                    ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                    ContentHome.selectedLocation = '';
+                    ContentHome.center = {
+                        lat: '',
+                        lng: ''
+                    };
+                    ContentHome.radiusMiles = 10;
+                    ContentHome.radiusFeet = 0;
+                };
+
+                /**
+                 * ContentHome.getMore is used to load the items
+                 */
+                ContentHome.getMore = function () {
+                    if (ContentHome.isBusy && !ContentHome.noMore) {
+                        return;
+                    }
+                    ContentHome.isBusy = true;
+                    GeoActions.find(searchOptions).then(function (result) {
+                        if (result.length <= _limit) {// to indicate there are more
+                            ContentHome.noMore = true;
+                        }
+                        else {
+                            result.pop();
+                            searchOptions.skip = searchOptions.skip + _limit;
+                            ContentHome.noMore = false;
+                        }
+                        ContentHome.items = ContentHome.items ? ContentHome.items.concat(result) : result;
+                        ContentHome.isBusy = false;
+                    }, function () {
+                        ContentHome.isBusy = false;
+                    });
+                };
+
+                /**
+                 * ContentHome.updateRadius updates the radius of a geoAction
+                 */
+                ContentHome.updateRadius = function () {
+                    ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
+                };
+
+                /**
+                 * ContentHome.removeListItem() used to delete an item from section list
+                 * @param index
+                 * @param event
+                 */
+                ContentHome.removeListItem = function (index, event) {
+
+                    if ("undefined" == typeof index) {
+                        return;
+                    }
+                    var item = ContentHome.items[index];
+                    if ("undefined" !== typeof item) {
+
+                        Modals.removePopupModal({event: event}).then(function (result) {
+                            if (result) {
+                                if (item.id == ContentHome.geoAction.id) {
+                                    ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
+                                    ContentHome.selectedLocation = '';
+                                    ContentHome.center = {
+                                        lat: '',
+                                        lng: ''
+                                    };
+                                    ContentHome.radiusMiles = 10;
+                                    ContentHome.radiusFeet = 0;
+                                }
+                                GeoActions.delete(item.id).then(function (data) {
+                                    ContentHome.items.splice(index, 1);
+                                }, function (err) {
+                                    console.error('Error while deleting an item-----', err);
+                                });
+                            }
+                        }, function (cancelData) {
+                            //do something on cancel
+                        });
+                    }
+                };
+
+                /**
+                 * ContentHome.selectItem shows the selected item in edit mode
+                 * @param item
+                 */
+                ContentHome.selectItem = function (item) {
+                    if (item && item.data) {
+                        ContentHome.geoAction = item;
+                        updateMasterItem(item);
+                        calculateRadiusInMilesAndFeet(item.data.radius);
+                        if (item.data.epicenter && item.data.epicenter.coordinates) {
+                            ContentHome.center = item.data.epicenter.coordinates;
+                            ContentHome.selectedLocation = item.data.epicenter.address;
+                        }
+                    }
+
+                };
+
+
+                /**
+                 * ContentHome.clearAction clears the selection action
+                 */
+                ContentHome.clearAction = function () {
+                    ContentHome.geoAction.data.actionToPerform = {};
+                };
+
+                /**
+                 *  ContentHome.getKeyName returns the value of key
+                 * @param key
+                 * @returns {*}
+                 */
+                ContentHome.getKeyName = function (key) {
+                    if (key) {
+                        switch (key) {
+                            case 'action':
+                                return 'Action Type';
+                            case 'url':
+                                return 'Url';
+                            case 'openIn' :
+                                return 'OpenIn';
+                            case 'title' :
+                                return 'Title';
+                            case 'email' :
+                                return 'Email Address';
+                            case 'subject' :
+                                return 'Subject';
+                            case 'body' :
+                                return 'Body';
+                            case 'phoneNumber' :
+                                return 'PhoneNumber';
+                            case 'address' :
+                                return 'Address';
+                            case 'lat' :
+                                return 'Lat';
+                            case 'lng' :
+                                return 'Lng';
+                            default :
+                                return key;
+                        }
+                    }
+
+                };
+
+                /**
+                 * ContentHome.openActionPopup opens the Popup to select the action
+                 */
+                ContentHome.openActionPopup = function () {
+                    var linkOptions = {"icon": "true"};
+                    var callback = function (error, result) {
+                        if (error) {
+                            return console.error('Error while selecting an action : ', error);
+                        }
+                        if (result)
+                            ContentHome.geoAction.data.actionToPerform = result;
+                        if (result && result.action == "sendSms") {
+                            result.body = "Hello, How are you? This is a test message."
+                        }
+                        $scope.$digest();
+                    };
+                    Buildfire.actionItems.showDialog(null, linkOptions, callback);
+                };
+
+                /**
+                 * Watcher to save the data with every change
+                 */
                 $scope.$watch(function () {
                     return ContentHome.geoAction;
                 }, updateItemsWithDelay, true);
 
+                init();
             }]);
 })(window.angular);

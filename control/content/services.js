@@ -13,66 +13,22 @@
                 this._tagName = tagName;
             }
 
-            DB.prototype.get = function () {
-                var that = this;
-                var deferred = $q.defer();
-                Buildfire.datastore.get(that._tagName, function (err, result) {
-                    if (err && err.code == CODES.NOT_FOUND) {
-                        return deferred.resolve();
-                    }
-                    else if (err) {
-                        return deferred.reject(err);
-                    }
-                    else {
-                        return deferred.resolve(result);
-                    }
-                });
-                return deferred.promise;
-            };
-            DB.prototype.getById = function (id) {
-                var that = this;
-                var deferred = $q.defer();
-                Buildfire.datastore.getById(id, that._tagName, function (err, result) {
-                    if (err) {
-                        return deferred.reject(err);
-                    }
-                    else if (result && result.data) {
-                        return deferred.resolve(result);
-                    } else {
-                        return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                    }
-                });
-                return deferred.promise;
-            };
             DB.prototype.insert = function (items) {
                 var that = this;
                 var deferred = $q.defer();
                 if (typeof items == 'undefined') {
                     return deferred.reject(new Error(MESSAGES.ERROR.DATA_NOT_DEFINED));
                 }
-                if (Array.isArray(items)) {
-                    Buildfire.datastore.bulkInsert(items, that._tagName, function (err, result) {
-                        if (err) {
-                            return deferred.reject(err);
-                        }
-                        else if (result) {
-                            return deferred.resolve(result);
-                        } else {
-                            return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                        }
-                    });
-                } else {
-                    Buildfire.datastore.insert(items, that._tagName, false, function (err, result) {
-                        if (err) {
-                            return deferred.reject(err);
-                        }
-                        else if (result) {
-                            return deferred.resolve(result);
-                        } else {
-                            return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                        }
-                    });
-                }
+                Buildfire.datastore.insert(items, that._tagName, false, function (err, result) {
+                    if (err) {
+                        return deferred.reject(err);
+                    }
+                    else if (result) {
+                        return deferred.resolve(result);
+                    } else {
+                        return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
+                    }
+                });
                 return deferred.promise;
             };
             DB.prototype.find = function (options) {
@@ -103,24 +59,6 @@
                     return deferred.reject(new Error(MESSAGES.ERROR.DATA_NOT_DEFINED));
                 }
                 Buildfire.datastore.update(id, item, that._tagName, function (err, result) {
-                    if (err) {
-                        return deferred.reject(err);
-                    }
-                    else if (result) {
-                        return deferred.resolve(result);
-                    } else {
-                        return deferred.reject(new Error(MESSAGES.ERROR.NOT_FOUND));
-                    }
-                });
-                return deferred.promise;
-            };
-            DB.prototype.save = function (item) {
-                var that = this;
-                var deferred = $q.defer();
-                if (typeof item == 'undefined') {
-                    return deferred.reject(new Error(MESSAGES.ERROR.DATA_NOT_DEFINED));
-                }
-                Buildfire.datastore.save(item, that._tagName, function (err, result) {
                     if (err) {
                         return deferred.reject(err);
                     }
@@ -181,31 +119,7 @@
                             });
                     }
                     else {
-                        deferred.resolve(null);
-                    }
-                    return deferred.promise;
-                },
-                getCoordinatesFromAddress: function (address) {
-                    var deferred = $q.defer();
-
-                    if (address) {
-                        $http.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=" + GOOGLE_KEYS.API_KEY)
-                            .then(function (response) {
-                                // this callback will be called asynchronously
-                                // when the response is available
-                                if (response.data && response.data.results && response.data.results.length) {
-                                    deferred.resolve(response);
-                                } else {
-                                    deferred.resolve(true);
-                                }
-                            }, function (error) {
-                                // called asynchronously if an error occurs
-                                // or server returns response with an error status.
-                                deferred.reject(error);
-                            });
-                    }
-                    else {
-                        deferred.resolve(null);
+                        deferred.reject({message: 'InValid Coordinates'});
                     }
                     return deferred.promise;
                 }

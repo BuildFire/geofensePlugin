@@ -1,4 +1,4 @@
-(function (angular, buildfire) {
+(function (angular) {
     "use strict";
     angular
         .module('geoFencePluginContent')
@@ -15,7 +15,6 @@
                         var location = autocomplete.getPlace().formatted_address;
                         if (autocomplete.getPlace().geometry) {
                             var coordinates = [autocomplete.getPlace().geometry.location.lng(), autocomplete.getPlace().geometry.location.lat()];
-                            console.log('scope.setLocationInController-------in directive-------', location, coordinates);
                             scope.setLocationInController({
                                 data: {
                                     location: location,
@@ -30,38 +29,40 @@
         .directive("googleMap", ['$timeout', function ($timeout) {
             return {
                 template: "<div></div>",
-                /*replace: true,
-                 scope: {coordinates: '=', draggedGeoData: '&draggedFn'},*/
                 link: function (scope, elem, attrs) {
                     var circle;
-
-                    buildfire.geo.getCurrentPosition(function (err, data) {
-                        console.log('getCurrentPosition data------', data, 'getCurrentPosition----err-----', err);
-                    });
-
-                    console.log('elem--------------------------------directive---', elem);
-                    console.log('attrs--------------------------------directive---', attrs);
-                    console.log('scope--------------------------------directive---', scope);
-
                     var map = new google.maps.Map(elem[0], {
-                        zoom: 10,
+                        zoom: 9,
                         center: {lat: 37.090, lng: -95.712}
                     });
 
-                    // Construct the circle for each value in citymap.
-                    // Note: We scale the area of the circle based on the population.
-                    // Add the circle for this city to the map.
-
-
                     attrs.$observe('googleMap', redrawTheCircle);
+                    attrs.$observe('googleMapRadius', redrawTheCircle);
 
+                    function calculateRadius(){
+                        var radiusInMeters;
+                        if((((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 < 3.048) ){
+                            radiusInMeters= 3.048;
+                            scope.ContentHome.geoAction.data.radius=3.048/1609.34;
+                            calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
+                        }
+                        else{
+                            radiusInMeters=((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34;
+                        }
+                        return radiusInMeters;
+                    }
 
-                    /*scope.$observe()$watch(function () {
-                     return scope.ContentHome.center;
-                     }, redrawTheCircle, true);*/
+                    function calculateRadiusInMilesAndFeet(radiusInMiles){
+                        scope.ContentHome.radiusMiles=parseInt(radiusInMiles);
+                        if(scope.ContentHome.radiusMiles){
+                            scope.ContentHome.radiusFeet=parseInt((parseFloat(radiusInMiles)%scope.ContentHome.radiusMiles)*5280);
+                        }
+                        else{
+                            scope.ContentHome.radiusFeet=parseInt(parseFloat(radiusInMiles)*5280);
+                        }
+                    }
 
                     function redrawTheCircle(newVal, oldVal) {
-                        console.log('GoogleMap---------------------------', newVal, oldVal);
                         if (circle)
                             circle.setMap(null);
                         circle = new google.maps.Circle({
@@ -72,26 +73,21 @@
                             fillOpacity: 0.35,
                             map: map,
                             center: (scope.ContentHome.center && scope.ContentHome.center.lat && scope.ContentHome.center.lng && scope.ContentHome.center) || ({"lat":32.715738,"lng":-117.16108380000003}),
-                            radius: (scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseInt(scope.ContentHome.geoAction.data.radius)) || 1000,
+                            radius: calculateRadius(),
                             editable: true
                         });
                         if (map && circle)
                             map.panTo(circle.getCenter());
                         circle.addListener('radius_changed', function () {
                             scope.$apply(function () {
-                                console.log('radius--------------------', circle.getRadius());
-                                scope.ContentHome.geoAction.data.radius = circle.getRadius();
-                                console.log('scope.ContentHome.geoAction-----------------',scope.ContentHome.geoAction);
+                                scope.ContentHome.geoAction.data.radius = (circle.getRadius()/1609.34);
+                                calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
                             });
-                            console.log('City Circle Event called');
-                            alert(circle.getRadius());
+                            console.info('Circle radius_changed Event called');
                         });
-                        /* $timeout(function(){
-                         circle.setMap(null);
-                         },5000);*/
                         circle.addListener('center_changed', function () {
                             var newCenter = circle.getCenter();
-                            console.log('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
+                            console.info('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
                             scope.ContentHome.center = {lat: newCenter.lat(), lng: newCenter.lng()};
                             scope.$apply(function(){
                                 scope.ContentHome.selectedLocation=newCenter.lat()+','+newCenter.lng();
@@ -99,11 +95,8 @@
                                 scope.ContentHome.geoAction.data.epicenter.coordinates=scope.ContentHome.center;
                             });
                             map.panTo(circle.getCenter());
-                            alert(circle.getRadius());
                         });
-                        console.log('cenetr changed-----------------------------------------------', scope.ContentHome.center);
                     }
-
                 }
             }
         }])
@@ -124,4 +117,4 @@
                 });
             };
         })
-})(window.angular, buildfire);
+})(window.angular);

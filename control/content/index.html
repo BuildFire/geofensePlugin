@@ -48,15 +48,6 @@
                         </div>
                     </div>
                 </div>
-                <!--<div class="d-item double-line square-icon clearfix active">
-                    <div class="copy pull-right">
-                        <span class="text-primary title ellipsis pull-left">Item Title</span>
-                        <span class="title ellipsis pull-left">Action Type</span>
-                        <div class="pull-right">
-                            <span class="btn-icon btn-delete-icon btn-danger"></span>
-                        </div>
-                    </div>
-                </div>-->
             </div>
         </div>
     </div>
@@ -75,12 +66,12 @@
                 <span>Action to Perform</span>
             </div>
             <div class="main col-xs-9 pull-right">
-                <a class="btn btn-primary padding-left-thirty padding-right-thirty">Select Action</a>
-                <a class="text-danger margin-left-ten small">Clear Action</a>
+                <a class="btn btn-primary padding-left-thirty padding-right-thirty" ng-click="ContentHome.openActionPopup()">Select Action</a>
+                <a class="text-danger margin-left-ten small" ng-show="ContentHome.geoAction.data.actionToPerform.action" ng-click="ContentHome.clearAction()">Clear Action</a>
 
-                <p class="info no-icon margin-top-ten">Action Selected: [Action_type]</p>
-
-                <p class="info no-icon margin-zero">Link: [Link]</p>
+                <p class="info no-icon" ng-repeat="(key,value) in ContentHome.geoAction.data.actionToPerform" ng-class="$index==0?'margin-top-ten' : 'margin-top-five' ">{{ContentHome.getKeyName(key)}}: {{value}}</p>
+                <!--<p class="info no-icon margin-top-ten">Action Selected: {{ContentHome.geoAction.data.actionToPerform.action}}</p>
+                <p class="info no-icon margin-zero">Link: {{ContentHome.geoAction.data.actionToPerform.url}}</p>-->
             </div>
         </div>
         <hr class="none">
@@ -98,6 +89,15 @@
                        ng-change="ContentHome.clearData()">
             </div>
         </div>
+        <hr class="none" ng-show="ContentHome.validCopyAddressFailure || ContentHome.validCoordinatesFailure">
+        <div class="alert alert-danger alert-sm text-center"
+             ng-show="ContentHome.validCopyAddressFailure">Please enter valid
+            address
+        </div>
+        <div class="alert alert-danger alert-sm text-center"
+             ng-show="ContentHome.validCoordinatesFailure">Please enter valid
+            coordinates
+        </div>
         <hr class="none">
         <div class="item clearfix row">
             <div class="labels col-xs-3 pull-left">
@@ -105,13 +105,13 @@
             </div>
             <div class="main col-xs-9 pull-right">
                 <div class="col-xs-3 pull-left padding-zero">
-                    <input type="text" placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.data.radius">
+                    <input type="text" placeholder="0" class="form-control text-center" ng-model="ContentHome.radiusMiles" ng-change="ContentHome.updateRadius()">
                 </div>
                 <div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
                     Miles and
                 </div>
                 <div class="col-xs-3 pull-left padding-zero">
-                    <input type="text" placeholder="0" class="form-control text-center" ng-model="ContentHome.geoAction.data.radius">
+                    <input type="number" placeholder="0" class="form-control text-center" ng-max="5279" ng-model="ContentHome.radiusFeet" ng-change="ContentHome.updateRadius()">
                 </div>
                 <div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
                     Feet
@@ -124,7 +124,7 @@
                 <span>Affected Area</span>
             </div>
             <div class="main col-xs-9 pull-right">
-                <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"></div>
+                <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}" google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
             </div>
         </div>
     </div>
