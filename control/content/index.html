@@ -67,7 +67,7 @@
             </div>
             <div class="main col-xs-9 pull-right">
                 <a class="btn btn-primary padding-left-thirty padding-right-thirty" ng-click="ContentHome.openActionPopup()">Select Action</a>
-                <a class="text-danger margin-left-ten small" ng-show="ContentHome.geoAction.data.actionToPerform.action">Clear Action</a>
+                <a class="text-danger margin-left-ten small" ng-show="ContentHome.geoAction.data.actionToPerform.action" ng-click="ContentHome.clearAction()">Clear Action</a>
 
                 <p class="info no-icon" ng-repeat="(key,value) in ContentHome.geoAction.data.actionToPerform" ng-class="$index==0?'margin-top-ten' : 'margin-top-five' ">{{ContentHome.getKeyName(key)}}: {{value}}</p>
                 <!--<p class="info no-icon margin-top-ten">Action Selected: {{ContentHome.geoAction.data.actionToPerform.action}}</p>

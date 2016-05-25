@@ -331,6 +331,11 @@
                 };
 
 
+                ContentHome.clearAction=function(){
+                    ContentHome.geoAction.data.actionToPerform={};
+                };
+
+
                 ContentHome.getKeyName = function (key) {
                     if (key) {
                         switch (key) {
