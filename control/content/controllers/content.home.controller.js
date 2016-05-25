@@ -8,6 +8,10 @@
                 var ContentHome = this;
                 var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
 
+                /**
+                 * calculateRadiusInMilesAndFeet calculates the radius in miles and feet
+                 * @param radiusInMiles
+                 */
                 function calculateRadiusInMilesAndFeet(radiusInMiles) {
                     ContentHome.radiusMiles = parseInt(radiusInMiles);
                     if (ContentHome.radiusMiles) {
@@ -16,39 +20,44 @@
                     else {
                         ContentHome.radiusFeet = parseInt(parseFloat(radiusInMiles) * 5280);
                     }
-                    console.log('calculateRadiusInMilesAndFeet------ In controller---------', radiusInMiles, ContentHome.radiusMiles, ContentHome.radiusFeet);
                 }
 
+                /**
+                 * errorAddress shows the error message when copied address is invalid
+                 */
                 function errorAddress() {
-                    console.error('error invalid Address');
                     ContentHome.validCopyAddressFailure = true;
                     $timeout(function () {
                         ContentHome.validCopyAddressFailure = false;
                     }, 5000);
-
                 }
 
+                /**
+                 * errorCoordinates shows the error message when copied coordinates are invalid
+                 * @param err
+                 */
                 function errorCoordinates(err) {
-                    console.error('Error while validating coordinates------------', err);
                     ContentHome.validCoordinatesFailure = true;
                     $timeout(function () {
                         ContentHome.validCoordinatesFailure = false;
                     }, 5000);
                 }
 
+                /**
+                 * successSetCoordinates sets the coordinates
+                 * @param resp
+                 */
                 function successSetCoordinates(resp) {
                     if (resp) {
                         ContentHome.center = {
                             lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
                             lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
                         };
-                    } else {
-                        console.log('coordinates validated successfully but no data recieved');
                     }
                 }
 
                 /**
-                 * This updateMasterItem will update the ContentMedia.masterItem with passed item
+                 * updateMasterItem will update the ContentMedia.masterItem with passed item
                  * @param item
                  */
                 function updateMasterItem(item) {
@@ -56,12 +65,11 @@
                 }
 
                 /**
-                 * This resetItem will reset the ContentMedia.item with ContentMedia.masterItem
+                 * resetItem will reset the ContentMedia.item with ContentMedia.masterItem
                  */
                 function resetItem() {
                     ContentHome.geoAction.data = angular.copy(ContentHome.masterGeoAction);
                 }
-
 
                 /**
                  * isUnChanged to check whether there is change in controller media item or not
@@ -72,12 +80,14 @@
                     return angular.equals(item, ContentHome.masterGeoAction);
                 }
 
+                /**
+                 * insertAndUpdate inserts and  updates the item
+                 * @param _item
+                 */
                 function insertAndUpdate(_item) {
-                    console.log('insertAndUpdate-----------------method called-----', _item);
                     updating = true;
                     if (_item.id) {
                         GeoActions.update(_item.id, _item.data).then(function (data) {
-                            console.log('Item updated successfully----------------', data);
                             updateMasterItem(data);
                             updating = false;
                         }, function (err) {
@@ -92,7 +102,6 @@
                             ContentHome.items.push(data);
                             updateMasterItem(data);
                             updating = false;
-                            console.log('new ---------------- Item inserted-------------------------------', data);
                         }, function (err) {
                             console.error('Error while updating an item data---', err);
                             resetItem();
@@ -101,7 +110,11 @@
                     }
                 }
 
-                //to validate the action with title
+                /**
+                 * isValidItem tells whether item is valid or not
+                 * @param action
+                 * @returns {*}
+                 */
                 function isValidItem(action) {
                     return action.data && action.data.title;
                 }
@@ -158,6 +171,9 @@
                     ContentHome.isBusy = false;
                 }
 
+                /**
+                 * ContentHome.setCoordinates validates and sets the coordinates
+                 */
                 ContentHome.setCoordinates = function () {
                     var latlng = '';
                     if (ContentHome.selectedLocation) {
@@ -166,17 +182,17 @@
                     Utils.validLongLats(latlng).then(successSetCoordinates, errorCoordinates);
                 };
 
+                /**
+                 * ContentHome.setLocation sets the address and coordinates
+                 * @param data
+                 */
                 ContentHome.setLocation = function (data) {
-                    console.log('SetLoaction caleed-------------------', data);
                     ContentHome.selectedLocation = data.location;
                     ContentHome.currentCoordinates = data.coordinates;
-
                     ContentHome.geoAction.data.epicenter.address = data.location;
                     ContentHome.geoAction.data.epicenter.coordinates = ContentHome.center;
-
                     ContentHome.center.lat = data.coordinates[1];
                     ContentHome.center.lng = data.coordinates[0];
-                    $scope.$digest();
                 };
 
                 /**
@@ -199,8 +215,7 @@
                         if ($(".pac-container .pac-item").length) {
                             var firstResult = $(".pac-container .pac-item:first").find('.pac-matched').map(function () {
                                 return $(this).text();
-                            }).get().join(); // + ', ' + $(".pac-container .pac-item:first").find('span:last').text();
-                            console.log('got ---- firstResult', firstResult);
+                            }).get().join();
                             var geocoder = new google.maps.Geocoder();
                             geocoder.geocode({"address": firstResult}, function (results, status) {
                                 if (status == google.maps.GeocoderStatus.OK) {
@@ -222,7 +237,6 @@
                         }
                         else {
                             errorAddress();
-                            console.error('InValid Input');
                         }
                     }, 1000);
 
@@ -260,7 +274,6 @@
                             ContentHome.noMore = false;
                         }
                         ContentHome.items = ContentHome.items ? ContentHome.items.concat(result) : result;
-                        console.log('items----------------->>>', angular.copy(ContentHome.items));
                         ContentHome.isBusy = false;
                     }, function () {
                         ContentHome.isBusy = false;
@@ -273,6 +286,7 @@
                 ContentHome.updateRadius = function () {
                     ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
+
                 /**
                  * ContentHome.removeListItem() used to delete an item from section list
                  * @param index
@@ -304,9 +318,6 @@
                                     console.error('Error while deleting an item-----', err);
                                 });
                             }
-                            else {
-                                console.info('Unable to load data.');
-                            }
                         }, function (cancelData) {
                             //do something on cancel
                         });
@@ -331,11 +342,18 @@
                 };
 
 
+                /**
+                 * ContentHome.clearAction clears the selection action
+                 */
                 ContentHome.clearAction=function(){
                     ContentHome.geoAction.data.actionToPerform={};
                 };
 
-
+                /**
+                 *  ContentHome.getKeyName returns the value of key
+                 * @param key
+                 * @returns {*}
+                 */
                 ContentHome.getKeyName = function (key) {
                     if (key) {
                         switch (key) {
@@ -368,6 +386,9 @@
 
                 };
 
+                /**
+                 * ContentHome.openActionPopup opens the Popup to select the action
+                 */
                 ContentHome.openActionPopup = function () {
                     var linkOptions = {"icon": "true"};
                     var callback = function (error, result) {
@@ -384,6 +405,9 @@
                     Buildfire.actionItems.showDialog(null, linkOptions, callback);
                 };
 
+                /**
+                 * Watcher to save the data with every change
+                 */
                 $scope.$watch(function () {
                     return ContentHome.geoAction;
                 }, updateItemsWithDelay, true);
