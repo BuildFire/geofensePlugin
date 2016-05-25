@@ -3,8 +3,8 @@
 (function (angular) {
     angular
         .module('geoFencePluginContent')
-        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA',
-            function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA) {
+        .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA', 'Buildfire',
+            function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA, Buildfire) {
                 var ContentHome = this;
                 var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
 
@@ -328,6 +328,55 @@
                         }
                     }
 
+                };
+
+
+                ContentHome.getKeyName = function (key) {
+                    if (key) {
+                        switch (key) {
+                            case 'action':
+                                return 'Action Type';
+                            case 'url':
+                                return 'Url';
+                            case 'openIn' :
+                                return 'OpenIn';
+                            case 'title' :
+                                return 'Title';
+                            case 'email' :
+                                return 'Email Address';
+                            case 'subject' :
+                                return 'Subject';
+                            case 'body' :
+                                return 'Body';
+                            case 'phoneNumber' :
+                                return 'PhoneNumber';
+                            case 'address' :
+                                return 'Address';
+                            case 'lat' :
+                                return 'Lat';
+                            case 'lng' :
+                                return 'Lng';
+                            default :
+                                return key;
+                        }
+                    }
+
+                };
+
+                ContentHome.openActionPopup = function () {
+                    var linkOptions = {"icon": "true"};
+                    var callback = function (error, result) {
+                        if (error) {
+                            return console.error('Error while selecting an action : ', error);
+                        }
+                        if (result)
+                            ContentHome.geoAction.data.actionToPerform = result;
+                        if (result && result.action == "sendSms") {
+                            result.body = "Hello, How are you? This is a test message."
+                        }
+                        $scope.$digest();
+                    };
+                    Buildfire.actionItems.showDialog(null, linkOptions, callback);
                 };
 
                 $scope.$watch(function () {
