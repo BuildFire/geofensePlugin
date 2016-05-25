@@ -193,6 +193,7 @@
                     ContentHome.geoAction.data.epicenter.coordinates = ContentHome.center;
                     ContentHome.center.lat = data.coordinates[1];
                     ContentHome.center.lng = data.coordinates[0];
+                    $scope.$digest();
                 };
 
                 /**
@@ -345,8 +346,8 @@
                 /**
                  * ContentHome.clearAction clears the selection action
                  */
-                ContentHome.clearAction=function(){
-                    ContentHome.geoAction.data.actionToPerform={};
+                ContentHome.clearAction = function () {
+                    ContentHome.geoAction.data.actionToPerform = {};
                 };
 
                 /**
