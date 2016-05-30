@@ -50,8 +50,8 @@
                 function successSetCoordinates(resp) {
                     if (resp) {
                         ContentHome.center = {
-                            lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
-                            lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
+                            lng: parseFloat(ContentHome.selectedLocation.split(",")[1].trim()),
+                            lat: parseFloat(ContentHome.selectedLocation.split(",")[0].trim())
                         };
                     }
                 }

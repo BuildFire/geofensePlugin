@@ -38,7 +38,7 @@
         <div id="items-scroll-infinite"  class="draggable-list-view no-media wide-list has-btn-link" style="background:#fff;">
             <div infinite-scroll-distance="0" infinite-scroll="ContentHome.getMore()"
                  infinite-scroll-disabled="ContentHome.noMore" infinite-scroll-container="'#items-scroll-infinite'">
-                <div class="d-item double-line square-icon clearfix" ng-repeat="item in ContentHome.items" ng-class="(item.id==ContentHome.geoAction.id) ? 'active' :'' ">
+                <div class="d-item double-line square-icon clearfix" ng-repeat="item in ContentHome.items" ng-if="ContentHome.items.length" ng-class="(item.id==ContentHome.geoAction.id) ? 'active' :'' ">
                     <div class="copy pull-right">
                         <span class="text-primary title ellipsis pull-left" ng-click="ContentHome.selectItem(item)">{{item.data.title}}</span>
                         <span class="title ellipsis pull-left">Action Type</span>
@@ -84,6 +84,7 @@
                        id="googleMapAutocomplete"
                        google-location-search callback-fn="ContentHome.setLocation(data)"
                        ng-model="ContentHome.selectedLocation"
+                       ng-model="ContentHome.center"
                        ng-enter="ContentHome.setCoordinates()"
                        ng-paste="ContentHome.locationAutocompletePaste()"
                        ng-change="ContentHome.clearData()">
@@ -105,7 +106,7 @@
             </div>
             <div class="main col-xs-9 pull-right">
                 <div class="col-xs-3 pull-left padding-zero">
-                    <input type="text" placeholder="0" class="form-control text-center" ng-model="ContentHome.radiusMiles" ng-change="ContentHome.updateRadius()">
+                    <input type="number" placeholder="0" class="form-control text-center" ng-model="ContentHome.radiusMiles" ng-change="ContentHome.updateRadius()">
                 </div>
                 <div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
                     Miles and
