@@ -135,6 +135,10 @@
                             insertAndUpdate(_item);
                         }, 300);
                     }
+                    else{
+                        if(!ContentHome.isItemValid)
+                        ContentHome.geoAction.data.title=angular.copy(ContentHome.masterGeoAction.data.title);
+                    }
                 }
 
                 /**
