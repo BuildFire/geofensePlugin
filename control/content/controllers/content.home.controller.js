@@ -365,7 +365,7 @@
                     if (key) {
                         switch (key) {
                             case 'action':
-                                return 'Action Type';
+                                return 'Action Selected';
                             case 'url':
                                 return 'Url';
                             case 'openIn' :
