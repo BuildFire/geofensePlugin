@@ -41,7 +41,7 @@
                 <div class="d-item double-line square-icon clearfix" ng-repeat="item in ContentHome.items" ng-if="ContentHome.items.length" ng-class="(item.id==ContentHome.geoAction.id) ? 'active' :'' ">
                     <div class="copy pull-right">
                         <span class="text-primary title ellipsis pull-left" ng-click="ContentHome.selectItem(item)">{{item.data.title}}</span>
-                        <span class="title ellipsis pull-left">Action Type</span>
+                        <span class="title ellipsis pull-left">{{item.data.actionToPerform.action}}</span>
 
                         <div class="pull-right">
                             <span class="btn-icon btn-delete-icon btn-danger" ng-click="ContentHome.removeListItem($index,$even)"></span>
