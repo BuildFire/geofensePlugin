@@ -50,8 +50,8 @@
                 function successSetCoordinates(resp) {
                     if (resp) {
                         ContentHome.center = {
-                            lng: parseInt(ContentHome.selectedLocation.split(",")[1].trim()),
-                            lat: parseInt(ContentHome.selectedLocation.split(",")[0].trim())
+                            lng: parseFloat(ContentHome.selectedLocation.split(",")[1].trim()),
+                            lat: parseFloat(ContentHome.selectedLocation.split(",")[0].trim())
                         };
                     }
                 }
@@ -134,6 +134,10 @@
                         tmrDelayForItem = $timeout(function () {
                             insertAndUpdate(_item);
                         }, 300);
+                    }
+                    else{
+                        if(!ContentHome.isItemValid)
+                        ContentHome.geoAction.data.title=angular.copy(ContentHome.masterGeoAction.data.title);
                     }
                 }
 
@@ -285,6 +289,8 @@
                  * ContentHome.updateRadius updates the radius of a geoAction
                  */
                 ContentHome.updateRadius = function () {
+                    ContentHome.radiusMiles=(parseInt(ContentHome.radiusMiles) || 0);
+                    ContentHome.radiusFeet=(parseInt(ContentHome.radiusFeet) || 0);
                     ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
 
@@ -359,7 +365,7 @@
                     if (key) {
                         switch (key) {
                             case 'action':
-                                return 'Action Type';
+                                return 'Action Selected';
                             case 'url':
                                 return 'Url';
                             case 'openIn' :
