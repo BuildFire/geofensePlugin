@@ -285,6 +285,8 @@
                  * ContentHome.updateRadius updates the radius of a geoAction
                  */
                 ContentHome.updateRadius = function () {
+                    ContentHome.radiusMiles=(parseInt(ContentHome.radiusMiles) || 0);
+                    ContentHome.radiusFeet=(parseInt(ContentHome.radiusFeet) || 0);
                     ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
 
