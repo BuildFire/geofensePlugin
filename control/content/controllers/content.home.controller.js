@@ -251,6 +251,7 @@
                  *  ContentHome.addNewItem allow us to add new Item
                  */
                 ContentHome.addNewItem = function () {
+                    ContentHome.masterGeoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
                     ContentHome.geoAction = angular.copy(DEFAULT_DATA.GEO_ACTION);
                     ContentHome.selectedLocation = '';
                     ContentHome.center = {
@@ -337,8 +338,8 @@
                  */
                 ContentHome.selectItem = function (item) {
                     if (item && item.data) {
-                        ContentHome.geoAction = item;
                         updateMasterItem(item);
+                        ContentHome.geoAction = item;
                         calculateRadiusInMilesAndFeet(item.data.radius);
                         if (item.data.epicenter && item.data.epicenter.coordinates) {
                             ContentHome.center = item.data.epicenter.coordinates;
