@@ -45,6 +45,19 @@
                 }
 
 
+                function trigerAction(lat, lng) {
+                    GeoItems.forEach(function (item) {
+                        var dis;
+                        if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
+                            dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
+                            console.log('Distance---------------------', dis, 'Item-------------------------------', item);
+                            if (dis < item.data.radius)
+                                Buildfire.actionItems.execute(item.data.actionToPerform);
+                        }
+                    })
+                }
+
+
                 function watcherFun() {
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
@@ -55,16 +68,8 @@
                                 console.error(err);
                             else {
                                 console.info('Watching Position---------watchId:::', position.watchId, position);
-                                if(position && position.coords && position.coords.latitude && position.coords.longitude){
-                                    GeoItems.forEach(function(item){
-                                        var dis;
-                                        if(item.data && item.data.epicenter &&  item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat){
-                                            dis=distance(position.coords.latitude , position.coords.longitude,item.data.epicenter.coordinates.lat,item.data.epicenter.coordinates.lng,'N');
-                                            console.log('Distance---------------------',dis,'Item-------------------------------',item);
-                                            if(dis<item.data.radius)
-                                            Buildfire.actionItems.execute(item.data.actionToPerform);
-                                        }
-                                    })
+                                if (position && position.coords && position.coords.latitude && position.coords.longitude) {
+                                    trigerAction(position.coords.latitude, position.coords.longitude);
                                 }
                             }
                         });
