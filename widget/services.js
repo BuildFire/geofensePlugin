@@ -8,10 +8,11 @@
                 return buildfire;
             };
         }])
-        .factory("DB", ['Buildfire', '$q', 'MESSAGES', 'CODES', function (Buildfire, $q, MESSAGES, CODES) {
+        .factory("DB", ['Buildfire', '$q', 'MESSAGES', function (Buildfire, $q, MESSAGES) {
             function DB(tagName) {
                 this._tagName = tagName;
             }
+
             DB.prototype.find = function (options) {
                 var that = this;
                 var deferred = $q.defer();
@@ -31,55 +32,5 @@
                 return deferred.promise;
             };
             return DB;
-        }])
-        .factory('GeoDistance', ['$q', '$http', function ($q, $http) {
-            var _getDistance = function (origin, items, distanceUnit) {
-                var deferred = $q.defer();
-                var destinationsMap = [];
-
-                if (!origin || !origin.lat) {
-                    deferred.reject({
-                        code: 'Lat lng not found',
-                        message: 'origin does not have the lat lng'
-                    });
-                }
-
-                if (!items || !Array.isArray(items) || !items.length) {
-                    deferred.reject({
-                        code: 'NOT_ARRAY',
-                        message: 'destinations is not an Array'
-                    });
-                }
-
-                items.forEach(function (_dest) {
-                    if (_dest && _dest.data && _dest.data.epicenter && _dest.data.epicenter.coordinates && _dest.data.epicenter.coordinates.lat && _dest.data.epicenter.coordinates.lng)
-                        destinationsMap.push({lat: _dest.data.epicenter.coordinates.lat, lng: _dest.data.epicenter.coordinates.lng});
-                    else
-                        destinationsMap.push({lat: 0, lng: 0});
-                });
-
-                console.log('Desination ------------------',destinationsMap);
-
-                var service = new google.maps.DistanceMatrixService;
-                service.getDistanceMatrix({
-                    origins: [origin],
-                    destinations: destinationsMap,
-                    travelMode: google.maps.TravelMode.DRIVING,
-                    unitSystem: distanceUnit == 'km' ? google.maps.UnitSystem.METRIC : google.maps.UnitSystem.IMPERIAL,
-                    avoidHighways: false,
-                    avoidTolls: false
-                }, function (response, status) {
-                    if (status !== google.maps.DistanceMatrixStatus.OK) {
-                        deferred.reject(status);
-                    } else {
-                        console.log('got distance-------------------',response);
-                        deferred.resolve(response);
-                    }
-                });
-                return deferred.promise;
-            };
-            return {
-                getDistance: _getDistance
-            }
-        }])
+        }]);
 })(window.angular, window.buildfire);

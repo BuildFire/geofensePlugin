@@ -3,8 +3,8 @@
 (function (angular) {
     angular
         .module('geoFenceWidget')
-        .controller('WidgetHomeCtrl', ['$scope', '$timeout', 'COLLECTIONS', 'DB', 'Buildfire', 'GeoDistance',
-            function ($scope, $timeout, COLLECTIONS, DB, Buildfire, GeoDistance) {
+        .controller('WidgetHomeCtrl', ['$scope', '$timeout', 'COLLECTIONS', 'DB', 'Buildfire',
+            function ($scope, $timeout, COLLECTIONS, DB, Buildfire) {
                 var WidgetHome = this;
                 var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [];
                 GeoActions = new DB(COLLECTIONS.GeoActions);
