@@ -28,7 +28,7 @@
 <body ng-controller="ContentHomeCtrl as ContentHome">
 <div class="item clearfix row">
     <div class="col-xs-4 col-xs-offset-4">
-        <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()">Add New Geo
+        <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add New Geo
             Action</a>
     </div>
 </div>
