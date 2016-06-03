@@ -33,10 +33,12 @@
         }])
         .controller('RemovePopupCtrl', ['$scope', '$modalInstance', 'Info','$timeout', function ($scope, $modalInstance, Info,$timeout) {
            var RemovePopup=this;
+            RemovePopup.showPopup=false;
             $timeout(function () {
                 var top =  Info.event.pageY-50;
                 $('.modal-dialog.modal-sm').offset({top: top, left: 0});
-            }, 700);
+                RemovePopup.showPopup=true;
+            }, 300);
             RemovePopup.ok = function () {
                 $modalInstance.close('yes');
             };

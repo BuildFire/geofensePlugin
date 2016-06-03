@@ -1,13 +1,13 @@
-<div class="header clearfix border-bottom-grey">
+<div class="header clearfix border-bottom-grey" ng-show="RemovePopup.showPopup">
 	<h4 class="margin-zero">Delete Item?</h4>
 	<span class="icon icon-cross2 close-modal" ng-click="RemovePopup.cancel()"></span>
 </div>
-<div class="padded clearfix">
+<div class="padded clearfix" ng-show="RemovePopup.showPopup">
 	<div class="content">
 		<p class="margin-zero">Are you sure you want to delete this item?</p>
 	</div>
 </div>
-<div class="bottom border-top-grey clearfix">
+<div class="bottom border-top-grey clearfix" ng-show="RemovePopup.showPopup">
 	<div class="col-md-6 pull-left text-center">
 		<a class="text-primary default-background-hover transition-third" ng-click="RemovePopup.cancel()">Cancel</a>
 	</div>
