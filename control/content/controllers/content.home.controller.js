@@ -6,6 +6,7 @@
         .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA', 'Buildfire',
             function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA, Buildfire) {
                 var ContentHome = this;
+                ContentHome.updatingData=false;
                 var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
 
                 /**
@@ -85,13 +86,23 @@
                  * @param _item
                  */
                 function insertAndUpdate(_item) {
+                    var index1;
+                    ContentHome.updatingData=true;
                     updating = true;
                     if (_item.id) {
                         GeoActions.update(_item.id, _item.data).then(function (data) {
                             updateMasterItem(data);
+                            ContentHome.items.filter(function (item,index) {
+                                if (item.id == _item.id){
+                                    index1=index;
+                                }
+                                return item.id == _item.id;});
+                            ContentHome.items[index1]=angular.copy(data);
                             updating = false;
+                            ContentHome.updatingData=false;
                         }, function (err) {
                             updating = false;
+                            ContentHome.updatingData=false;
                             resetItem();
                             console.error('Error while inserting an item data---', err);
                         });
@@ -99,13 +110,15 @@
                     else {
                         GeoActions.insert(_item.data).then(function (data) {
                             ContentHome.geoAction = data;
-                            ContentHome.items.push(data);
+                            ContentHome.items.push(angular.copy(data));
                             updateMasterItem(data);
                             updating = false;
+                            ContentHome.updatingData=false;
                         }, function (err) {
                             console.error('Error while updating an item data---', err);
                             resetItem();
                             updating = false;
+                            ContentHome.updatingData=false;
                         });
                     }
                 }
@@ -135,10 +148,10 @@
                             insertAndUpdate(_item);
                         }, 300);
                     }
-                    else{
-                        if(!ContentHome.isItemValid)
-                        ContentHome.geoAction.data.title=angular.copy(ContentHome.masterGeoAction.data.title);
-                    }
+                   /* else {
+                        if (!ContentHome.isItemValid && ContentHome.geoAction.id)
+                            ContentHome.geoAction.data.title = angular.copy(ContentHome.masterGeoAction.data.title);
+                    }*/
                 }
 
                 /**
@@ -290,8 +303,8 @@
                  * ContentHome.updateRadius updates the radius of a geoAction
                  */
                 ContentHome.updateRadius = function () {
-                    ContentHome.radiusMiles=(parseInt(ContentHome.radiusMiles) || 0);
-                    ContentHome.radiusFeet=(parseInt(ContentHome.radiusFeet) || 0);
+                    ContentHome.radiusMiles = (parseInt(ContentHome.radiusMiles) || 0);
+                    ContentHome.radiusFeet = (parseInt(ContentHome.radiusFeet) || 0);
                     ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
 
@@ -338,8 +351,8 @@
                  */
                 ContentHome.selectItem = function (item) {
                     if (item && item.data) {
-                        updateMasterItem(item);
-                        ContentHome.geoAction = item;
+                        updateMasterItem(angular.copy(item));
+                        ContentHome.geoAction = angular.copy(item);
                         calculateRadiusInMilesAndFeet(item.data.radius);
                         if (item.data.epicenter && item.data.epicenter.coordinates) {
                             ContentHome.center = item.data.epicenter.coordinates;
