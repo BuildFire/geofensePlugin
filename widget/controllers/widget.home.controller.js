@@ -51,8 +51,10 @@
                         if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
                             dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
                             console.log('Distance---------------------', dis, 'Item-------------------------------', item);
-                            if (dis < item.data.radius)
+                            if (dis < item.data.radius && !item.actionPerformed){
+                                item.actionPerformed=true;
                                 Buildfire.actionItems.execute(item.data.actionToPerform);
+                            }
                         }
                     })
                 }
@@ -61,13 +63,13 @@
                 function watcherFun() {
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
-                        null,
-                        function (err, position) {
+                        {enableHighAccuracy:true,timeout:30000},
+                        function (position,err) {
                             //clearWatcher(position.watchId);
                             if (err)
                                 console.error(err);
                             else {
-                                alert('Watcher Called-----------'+ position.watchId +' location----'+ position.coords.latitude+ ','+position.coords.longitude);
+                                //alert('Watcher Called-----------'+ position.watchId +' location----'+ position.coords.latitude+ ','+position.coords.longitude);
                                 console.info('Watching Position------watchId:::', position.watchId, position);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     trigerAction(position.coords.latitude, position.coords.longitude);
