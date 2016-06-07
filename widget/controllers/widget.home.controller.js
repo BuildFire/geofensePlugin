@@ -61,8 +61,8 @@
                 function watcherFun() {
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
-                        null,
-                        function (err, position) {
+                        {enableHighAccuracy:true,timeout:30000},
+                        function (position,err) {
                             //clearWatcher(position.watchId);
                             if (err)
                                 console.error(err);
