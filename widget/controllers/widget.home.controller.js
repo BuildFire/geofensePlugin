@@ -6,7 +6,7 @@
         .controller('WidgetHomeCtrl', ['$scope', '$timeout', 'COLLECTIONS', 'DB', 'Buildfire',
             function ($scope, $timeout, COLLECTIONS, DB, Buildfire) {
                 var WidgetHome = this;
-                var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [];
+                var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
                 GeoActions = new DB(COLLECTIONS.GeoActions);
 
                 console.log('WidgetHomeCtrl loaded');
@@ -16,6 +16,15 @@
                     skip: _skip,
                     limit: _limit + 1 // the plus one is to check if there are any more
                 };
+
+                GeoInfo = new DB(COLLECTIONS.GeoInfo);
+                GeoInfo.get().then(function (data) {
+                    console.log('Got Info in Widget------------', data);
+                    info = data;
+                }, function (err) {
+                    info = null;
+                    console.error('Got Error while getting geoInfo------', err);
+                });
 
                 GeoActions.find(searchOptions).then(function (result) {
                     console.log('Item got based on the search------------------Widget Section-------', result);
@@ -51,8 +60,8 @@
                         if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
                             dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
                             console.log('Distance---------------------', dis, 'Item-------------------------------', item);
-                            if (dis < item.data.radius && !item.actionPerformed){
-                                item.actionPerformed=true;
+                            if (dis < item.data.radius && !item.actionPerformed) {
+                                item.actionPerformed = true;
                                 Buildfire.actionItems.execute(item.data.actionToPerform);
                             }
                         }
@@ -63,14 +72,14 @@
                 function watcherFun() {
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
-                        {enableHighAccuracy:true,timeout:30000},
-                        function (position,err) {
+                        {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
+                        function (position, err) {
                             //clearWatcher(position.watchId);
                             if (err)
                                 console.error(err);
                             else {
-                                //alert('Watcher Called-----------'+ position.watchId +' location----'+ position.coords.latitude+ ','+position.coords.longitude);
-                                console.info('Watching Position------watchId:::', position.watchId, position);
+                                //alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
+                                console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     trigerAction(position.coords.latitude, position.coords.longitude);
                                 }
@@ -85,5 +94,15 @@
                     })
                 }
 
+               /* Buildfire.datastore.onUpdate(function (event) {
+                    console.log('OnUpdate Called----------------', event);
+                    switch (event.tag) {
+                        case COLLECTIONS.GeoInfo:
+                            info=event;
+                            break;
+                        case COLLECTIONS.GeoActions:
+                    }
+                });
+*/
             }]);
 })(window.angular);

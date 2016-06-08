@@ -31,6 +31,22 @@
                 });
                 return deferred.promise;
             };
+            DB.prototype.get = function () {
+                var that = this;
+                var deferred = $q.defer();
+                Buildfire.datastore.get(that._tagName, function (err, result) {
+                    if (err && err.code == CODES.NOT_FOUND) {
+                        return deferred.resolve();
+                    }
+                    else if (err) {
+                        return deferred.reject(err);
+                    }
+                    else {
+                        return deferred.resolve(result);
+                    }
+                });
+                return deferred.promise;
+            };
             return DB;
         }]);
 })(window.angular, window.buildfire);

@@ -5,6 +5,7 @@
 
     <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../../../../styles/siteIcons.css">
 
     <!--SDK js-->
     <script src="../../../../scripts/buildfire.js"></script>
@@ -27,24 +28,33 @@
 </head>
 <body ng-controller="ContentHomeCtrl as ContentHome">
 <div class="item clearfix row">
-    <div class="col-xs-4 col-xs-offset-4">
-        <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add New Geo
+    <div class="col-xs-4 col-xs-offset-4 pull-left margin-left-ten">
+        <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add
+            New Geo
             Action</a>
+    </div>
+    <div class="col-xs-4 col-xs-offset-1 pull-right checkbox checkbox-primary">
+        <input id="checkboxid" type="checkbox" ng-change="ContentHome.saveInfo()" ng-model="ContentHome.geoInfo.data.highAccuracy" ng-checked="ContentHome.geoInfo.data.highAccuracy">
+        <label for="checkboxid">Enable High Accuracy</label>
     </div>
 </div>
 <hr class="none">
 <div class="item clearfix row tabs border-top-grey">
     <div class="col-xs-5 pull-left padding-right-zero">
-        <div id="items-scroll-infinite"  class="draggable-list-view no-media wide-list has-btn-link" style="background:#fff;">
+        <div id="items-scroll-infinite" class="draggable-list-view no-media wide-list has-btn-link"
+             style="background:#fff;">
             <div infinite-scroll-distance="0" infinite-scroll="ContentHome.getMore()"
                  infinite-scroll-disabled="ContentHome.noMore" infinite-scroll-container="'#items-scroll-infinite'">
-                <div class="d-item double-line square-icon clearfix" ng-repeat="item in ContentHome.items track by $index" ng-if="ContentHome.items.length" ng-class="(item.id==ContentHome.geoAction.id) ? 'active' :'' ">
+                <div class="d-item double-line square-icon clearfix"
+                     ng-repeat="item in ContentHome.items track by $index" ng-if="ContentHome.items.length"
+                     ng-class="(item.id==ContentHome.geoAction.id) ? 'active' :'' ">
                     <div class="copy pull-right">
                         <span class="text-primary title ellipsis pull-left" ng-click="ContentHome.selectItem(item)">{{item.data.title}}</span>
                         <span class="title ellipsis pull-left">{{item.data.actionToPerform.action}}</span>
 
                         <div class="pull-right">
-                            <span class="btn-icon btn-delete-icon btn-danger" ng-click="ContentHome.removeListItem($index,$even)"></span>
+                            <span class="btn-icon btn-delete-icon btn-danger"
+                                  ng-click="ContentHome.removeListItem($index,$even)"></span>
                         </div>
                     </div>
                 </div>
@@ -66,10 +76,14 @@
                 <span>Action to Perform</span>
             </div>
             <div class="main col-xs-9 pull-right">
-                <a class="btn btn-primary padding-left-thirty padding-right-thirty" ng-click="ContentHome.openActionPopup()">Select Action</a>
-                <a class="text-danger margin-left-ten small" ng-show="ContentHome.geoAction.data.actionToPerform.action" ng-click="ContentHome.clearAction()">Clear Action</a>
+                <a class="btn btn-primary padding-left-thirty padding-right-thirty"
+                   ng-click="ContentHome.openActionPopup()">Select Action</a>
+                <a class="text-danger margin-left-ten small" ng-show="ContentHome.geoAction.data.actionToPerform.action"
+                   ng-click="ContentHome.clearAction()">Clear Action</a>
 
-                <p class="info no-icon break-word" ng-repeat="(key,value) in ContentHome.geoAction.data.actionToPerform" ng-class="$index==0?'margin-top-ten' : 'margin-top-five' ">{{ContentHome.getKeyName(key)}}: {{value}}</p>
+                <p class="info no-icon break-word" ng-repeat="(key,value) in ContentHome.geoAction.data.actionToPerform"
+                   ng-class="$index==0?'margin-top-ten' : 'margin-top-five' ">{{ContentHome.getKeyName(key)}}:
+                    {{value}}</p>
                 <!--<p class="info no-icon margin-top-ten">Action Selected: {{ContentHome.geoAction.data.actionToPerform.action}}</p>
                 <p class="info no-icon margin-zero">Link: {{ContentHome.geoAction.data.actionToPerform.url}}</p>-->
             </div>
@@ -106,13 +120,17 @@
             </div>
             <div class="main col-xs-9 pull-right">
                 <div class="col-xs-3 pull-left padding-zero">
-                    <input type="number" placeholder="0" class="form-control text-center" ng-model="ContentHome.radiusMiles" ng-change="ContentHome.updateRadius()" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                    <input type="number" placeholder="0" class="form-control text-center"
+                           ng-model="ContentHome.radiusMiles" ng-change="ContentHome.updateRadius()"
+                           onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                 </div>
                 <div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
                     Miles and
                 </div>
                 <div class="col-xs-3 pull-left padding-zero">
-                    <input type="number" placeholder="0" class="form-control text-center" ng-max="5279" ng-model="ContentHome.radiusFeet" ng-change="ContentHome.updateRadius()" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                    <input type="number" placeholder="0" class="form-control text-center" ng-max="5279"
+                           ng-model="ContentHome.radiusFeet" ng-change="ContentHome.updateRadius()"
+                           onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                 </div>
                 <div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
                     Feet
@@ -131,7 +149,8 @@
                 <span>Affected Area</span>
             </div>
             <div class="main col-xs-9 pull-right">
-                <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}" google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
+                <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"
+                     google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
             </div>
         </div>
     </div>

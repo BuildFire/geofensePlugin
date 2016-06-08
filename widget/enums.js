@@ -12,7 +12,8 @@
             }
         })
         .constant('COLLECTIONS', {
-            GeoActions: "geoActions"
+            GeoActions: "geoActions",
+            GeoInfo:"geoInfo"
         })
         .constant('GOOGLE_KEYS', {
             API_KEY: 'AIzaSyB0xpJ-AseoeusvT2PPWd5MOak58CR_B0c'

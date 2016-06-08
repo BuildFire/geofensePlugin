@@ -16,7 +16,8 @@
             }
         })
         .constant('COLLECTIONS', {
-            GeoActions: "geoActions"
+            GeoActions: "geoActions",
+            GeoInfo:"geoInfo"
         })
         .constant('GOOGLE_KEYS', {
             API_KEY: 'AIzaSyB0xpJ-AseoeusvT2PPWd5MOak58CR_B0c'
@@ -28,6 +29,11 @@
                     actionToPerform: {},
                     epicenter: {address: '', coordinates: {lat: '', long: ''}},
                     radius: 10 //in meters
+                }
+            },
+            GEO_INFO:{
+                data:{
+                    highAccuracy:false
                 }
             }
         });

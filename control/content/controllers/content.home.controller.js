@@ -6,8 +6,8 @@
         .controller('ContentHomeCtrl', ['$scope', '$timeout', 'Utils', 'COLLECTIONS', 'DB', 'Modals', 'DEFAULT_DATA', 'Buildfire',
             function ($scope, $timeout, Utils, COLLECTIONS, DB, Modals, DEFAULT_DATA, Buildfire) {
                 var ContentHome = this;
-                ContentHome.updatingData=false;
-                var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, updating;
+                ContentHome.updatingData = false;
+                var _skip, _limit, searchOptions, tmrDelayForItem, GeoActions, GeoInfo, updating;
 
                 /**
                  * calculateRadiusInMilesAndFeet calculates the radius in miles and feet
@@ -87,22 +87,23 @@
                  */
                 function insertAndUpdate(_item) {
                     var index1;
-                    ContentHome.updatingData=true;
+                    ContentHome.updatingData = true;
                     updating = true;
                     if (_item.id) {
                         GeoActions.update(_item.id, _item.data).then(function (data) {
                             updateMasterItem(data);
-                            ContentHome.items.filter(function (item,index) {
-                                if (item.id == _item.id){
-                                    index1=index;
+                            ContentHome.items.filter(function (item, index) {
+                                if (item.id == _item.id) {
+                                    index1 = index;
                                 }
-                                return item.id == _item.id;});
-                            ContentHome.items[index1]=angular.copy(data);
+                                return item.id == _item.id;
+                            });
+                            ContentHome.items[index1] = angular.copy(data);
                             updating = false;
-                            ContentHome.updatingData=false;
+                            ContentHome.updatingData = false;
                         }, function (err) {
                             updating = false;
-                            ContentHome.updatingData=false;
+                            ContentHome.updatingData = false;
                             resetItem();
                             console.error('Error while inserting an item data---', err);
                         });
@@ -113,12 +114,12 @@
                             ContentHome.items.push(angular.copy(data));
                             updateMasterItem(data);
                             updating = false;
-                            ContentHome.updatingData=false;
+                            ContentHome.updatingData = false;
                         }, function (err) {
                             console.error('Error while updating an item data---', err);
                             resetItem();
                             updating = false;
-                            ContentHome.updatingData=false;
+                            ContentHome.updatingData = false;
                         });
                     }
                 }
@@ -148,10 +149,10 @@
                             insertAndUpdate(_item);
                         }, 300);
                     }
-                   /* else {
-                        if (!ContentHome.isItemValid && ContentHome.geoAction.id)
-                            ContentHome.geoAction.data.title = angular.copy(ContentHome.masterGeoAction.data.title);
-                    }*/
+                    /* else {
+                     if (!ContentHome.isItemValid && ContentHome.geoAction.id)
+                     ContentHome.geoAction.data.title = angular.copy(ContentHome.masterGeoAction.data.title);
+                     }*/
                 }
 
                 /**
@@ -168,6 +169,7 @@
                     };
                     tmrDelayForItem = null;
                     GeoActions = new DB(COLLECTIONS.GeoActions);
+                    GeoInfo = new DB(COLLECTIONS.GeoInfo);
                     updating = false;
                     ContentHome.radiusMiles = 10;
                     ContentHome.radiusFeet = 0;
@@ -186,6 +188,16 @@
                      * @type {boolean}
                      */
                     ContentHome.isBusy = false;
+
+                    GeoInfo.get().then(function (data) {
+                        if (data && data.id)
+                            ContentHome.geoInfo = data;
+                        else
+                            ContentHome.geoInfo = angular.copy(DEFAULT_DATA.GEO_INFO);
+                    }, function (err) {
+                        ContentHome.geoInfo = angular.copy(DEFAULT_DATA.GEO_INFO);
+                        console.error('Got Error while getting geoInfo------', err);
+                    });
                 }
 
                 /**
@@ -273,6 +285,13 @@
                     };
                     ContentHome.radiusMiles = 10;
                     ContentHome.radiusFeet = 0;
+                };
+
+                ContentHome.saveInfo=function(){
+                    GeoInfo.save(ContentHome.geoInfo.data).then(function(data){
+                    },function(err){
+                        console.error('Got error while saving data :',err);
+                    });
                 };
 
                 /**
