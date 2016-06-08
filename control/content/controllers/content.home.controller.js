@@ -194,7 +194,6 @@
                             ContentHome.geoInfo = data;
                         else
                             ContentHome.geoInfo = angular.copy(DEFAULT_DATA.GEO_INFO);
-                        console.log('Got GeoInfo------------------------', data,DEFAULT_DATA.GEO_INFO,ContentHome.geoInfo);
                     }, function (err) {
                         ContentHome.geoInfo = angular.copy(DEFAULT_DATA.GEO_INFO);
                         console.error('Got Error while getting geoInfo------', err);
