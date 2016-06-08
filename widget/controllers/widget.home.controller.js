@@ -78,8 +78,8 @@
                             if (err)
                                 console.error(err);
                             else {
-                                alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
-                                console.info('Watching Position------watchId:::', position.watchId, position);
+                                //alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
+                                console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     trigerAction(position.coords.latitude, position.coords.longitude);
                                 }
