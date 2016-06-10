@@ -156,6 +156,17 @@
                 }
 
                 /**
+                 * getFeetForRadius method return the feet value
+                 * @returns {number}
+                 */
+                function getFeetForRadius() {
+                    if (parseInt(ContentHome.radiusMiles))
+                        return 0;
+                    else
+                        return 10;
+                }
+
+                /**
                  * initialization of variables
                  */
                 function init() {
@@ -323,7 +334,7 @@
                  */
                 ContentHome.updateRadius = function () {
                     ContentHome.radiusMiles = (parseInt(ContentHome.radiusMiles) || 0);
-                    ContentHome.radiusFeet = (parseInt(ContentHome.radiusFeet) || 0);
+                    ContentHome.radiusFeet = (parseInt(ContentHome.radiusFeet) || getFeetForRadius());
                     ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
 
