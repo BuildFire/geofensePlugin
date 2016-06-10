@@ -287,10 +287,10 @@
                     ContentHome.radiusFeet = 0;
                 };
 
-                ContentHome.saveInfo=function(){
-                    GeoInfo.save(ContentHome.geoInfo.data).then(function(data){
-                    },function(err){
-                        console.error('Got error while saving data :',err);
+                ContentHome.saveInfo = function () {
+                    GeoInfo.save(ContentHome.geoInfo.data).then(function (data) {
+                    }, function (err) {
+                        console.error('Got error while saving data :', err);
                     });
                 };
 
@@ -430,6 +430,11 @@
                  * ContentHome.openActionPopup opens the Popup to select the action
                  */
                 ContentHome.openActionPopup = function () {
+                    var action;
+                    if (ContentHome.geoAction.data.actionToPerform && ContentHome.geoAction.data.actionToPerform.action)
+                        action = ContentHome.geoAction.data.actionToPerform;
+                    else
+                        action = null;
                     var linkOptions = {"icon": "true"};
                     var callback = function (error, result) {
                         if (error) {
@@ -437,12 +442,15 @@
                         }
                         if (result)
                             ContentHome.geoAction.data.actionToPerform = result;
+                        else {
+                            ContentHome.geoAction.data.actionToPerform = {};
+                        }
                         if (result && result.action == "sendSms") {
                             result.body = "Hello, How are you? This is a test message."
                         }
                         $scope.$digest();
                     };
-                    Buildfire.actionItems.showDialog(null, linkOptions, callback);
+                    Buildfire.actionItems.showDialog(action, linkOptions, callback);
                 };
 
                 /**
