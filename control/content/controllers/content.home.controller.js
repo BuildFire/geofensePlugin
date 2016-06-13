@@ -98,7 +98,7 @@
                                 }
                                 return item.id == _item.id;
                             });
-                            ContentHome.items[index1] = angular.copy(data);
+                            ContentHome.items[index1] = angular.copy(ContentHome.geoAction);
                             updating = false;
                             ContentHome.updatingData = false;
                         }, function (err) {
@@ -110,9 +110,11 @@
                     }
                     else {
                         GeoActions.insert(_item.data).then(function (data) {
-                            ContentHome.geoAction = data;
-                            ContentHome.items.push(angular.copy(data));
-                            updateMasterItem(data);
+                            if (data && data.id) {
+                                ContentHome.geoAction.id = data.id;
+                                ContentHome.items.push(angular.copy(ContentHome.geoAction));
+                                updateMasterItem(data);
+                            }
                             updating = false;
                             ContentHome.updatingData = false;
                         }, function (err) {
@@ -153,6 +155,17 @@
                      if (!ContentHome.isItemValid && ContentHome.geoAction.id)
                      ContentHome.geoAction.data.title = angular.copy(ContentHome.masterGeoAction.data.title);
                      }*/
+                }
+
+                /**
+                 * getFeetForRadius method return the feet value
+                 * @returns {number}
+                 */
+                function getFeetForRadius() {
+                    if (parseInt(ContentHome.radiusMiles))
+                        return 0;
+                    else
+                        return 10;
                 }
 
                 /**
@@ -287,10 +300,10 @@
                     ContentHome.radiusFeet = 0;
                 };
 
-                ContentHome.saveInfo=function(){
-                    GeoInfo.save(ContentHome.geoInfo.data).then(function(data){
-                    },function(err){
-                        console.error('Got error while saving data :',err);
+                ContentHome.saveInfo = function () {
+                    GeoInfo.save(ContentHome.geoInfo.data).then(function (data) {
+                    }, function (err) {
+                        console.error('Got error while saving data :', err);
                     });
                 };
 
@@ -323,7 +336,7 @@
                  */
                 ContentHome.updateRadius = function () {
                     ContentHome.radiusMiles = (parseInt(ContentHome.radiusMiles) || 0);
-                    ContentHome.radiusFeet = (parseInt(ContentHome.radiusFeet) || 0);
+                    ContentHome.radiusFeet = (parseInt(ContentHome.radiusFeet) || getFeetForRadius());
                     ContentHome.geoAction.data.radius = parseInt(ContentHome.radiusMiles) + parseFloat(ContentHome.radiusFeet / 5280);
                 };
 
@@ -430,6 +443,11 @@
                  * ContentHome.openActionPopup opens the Popup to select the action
                  */
                 ContentHome.openActionPopup = function () {
+                    var action;
+                    if (ContentHome.geoAction.data.actionToPerform && ContentHome.geoAction.data.actionToPerform.action)
+                        action = ContentHome.geoAction.data.actionToPerform;
+                    else
+                        action = null;
                     var linkOptions = {"icon": "true"};
                     var callback = function (error, result) {
                         if (error) {
@@ -437,12 +455,15 @@
                         }
                         if (result)
                             ContentHome.geoAction.data.actionToPerform = result;
+                        else {
+                            ContentHome.geoAction.data.actionToPerform = {};
+                        }
                         if (result && result.action == "sendSms") {
                             result.body = "Hello, How are you? This is a test message."
                         }
                         $scope.$digest();
                     };
-                    Buildfire.actionItems.showDialog(null, linkOptions, callback);
+                    Buildfire.actionItems.showDialog(action, linkOptions, callback);
                 };
 
                 /**

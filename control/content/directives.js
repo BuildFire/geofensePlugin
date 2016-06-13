@@ -114,13 +114,13 @@
                     if (event.which === 13 && element && element.length) {
                         var val = element[0].value,
                             regex = /^[0-9\-\., ]+$/g;
-                        if (regex.test(val)) {
+                       // if (regex.test(val)) {
                             scope.$apply(function () {
                                 scope.$eval(attrs.ngEnter);
                             });
 
                             event.preventDefault();
-                        }
+                       // }
                     }
                 });
             };
