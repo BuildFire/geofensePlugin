@@ -76,7 +76,7 @@
                         function (position, err) {
                             //clearWatcher(position.watchId);
                             if (err)
-                                alert("GEO ERROR------------------->"err);
+                                alert("GEO ERROR------------------->",err);
                             else {
                                 //alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
