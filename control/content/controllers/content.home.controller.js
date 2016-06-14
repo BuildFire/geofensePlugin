@@ -98,7 +98,7 @@
                                 }
                                 return item.id == _item.id;
                             });
-                            ContentHome.items[index1] = angular.copy(data);
+                            ContentHome.items[index1] = angular.copy(ContentHome.geoAction);
                             updating = false;
                             ContentHome.updatingData = false;
                         }, function (err) {
@@ -110,9 +110,11 @@
                     }
                     else {
                         GeoActions.insert(_item.data).then(function (data) {
-                            ContentHome.geoAction = data;
-                            ContentHome.items.push(angular.copy(data));
-                            updateMasterItem(data);
+                            if (data && data.id) {
+                                ContentHome.geoAction.id = data.id;
+                                ContentHome.items.push(angular.copy(ContentHome.geoAction));
+                                updateMasterItem(data);
+                            }
                             updating = false;
                             ContentHome.updatingData = false;
                         }, function (err) {

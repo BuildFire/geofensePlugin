@@ -121,7 +121,8 @@
             <div class="main col-xs-9 pull-right">
                 <div class="col-xs-3 pull-left padding-zero">
                     <input type="number" placeholder="0" class="form-control text-center"
-                           ng-model="ContentHome.radiusMiles" ng-change="ContentHome.updateRadius()"
+                           ng-model="ContentHome.radiusMiles"
+                           ng-change="ContentHome.updateRadius()"
                            onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                 </div>
                 <div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
@@ -129,7 +130,9 @@
                 </div>
                 <div class="col-xs-3 pull-left padding-zero">
                     <input type="number" placeholder="0" class="form-control text-center" ng-max="5279"
-                           ng-model="ContentHome.radiusFeet" ng-change="ContentHome.updateRadius()"
+                           ng-model="ContentHome.radiusFeet"
+                           ng-change="ContentHome.updateRadius()"
+                           ng-model-options="{debounce : 300}"
                            onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                 </div>
                 <div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
@@ -145,14 +148,17 @@
         </div>
         <hr class="none">
         <div class="item clearfix row">
-            <div class="labels col-xs-3 pull-left">
+            <div class="labels col-xs-4 pull-left">
                 <span>Affected Area</span>
             </div>
-            <div class="main col-xs-9 pull-right">
-                <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"
-                     google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
-            </div>
         </div>
+      <hr class="none">
+      <div class="item clearfix row">
+        <div class="main col-xs-9 pull-right">
+          <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"
+               google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
+        </div>
+      </div>
     </div>
 </div>
 </body>
