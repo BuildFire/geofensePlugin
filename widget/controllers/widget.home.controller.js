@@ -76,7 +76,7 @@
                         function (position, err) {
                             //clearWatcher(position.watchId);
                             if (err)
-                                console.error(err);
+                                alert("GEO ERROR------------------->"err);
                             else {
                                 //alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
@@ -89,7 +89,9 @@
 
                 function clearWatcher(watchId) {
                     Buildfire.geo.clearWatch(watchId, function (err, data) {
-                        console.info('Watcher has been cleared-----', err, data);
+                        if(err)
+                            alert(err);
+                        console.info('Watcher has been cleared-----GEO ERROR , DATA', err, data);
                         watcherFun();
                     })
                 }
