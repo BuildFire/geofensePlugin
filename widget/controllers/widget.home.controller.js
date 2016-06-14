@@ -70,56 +70,22 @@
 
 
                 function watcherFun() {
-                    getLocation();
+                   // getLocation();
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                         function (err, position) {
                             //clearWatcher(position.watchId);
                             if (err)
-                                alert("GEO ERROR------------------->",err);
+                                alert("Enable your location service to use this plugin");
                             else {
-                                alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
+                              //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     trigerAction(position.coords.latitude, position.coords.longitude);
                                 }
                             }
                         });
-                }
-
-                function getLocation()
-                {
-                    if (navigator.geolocation)
-                    {
-                        navigator.geolocation.getCurrentPosition(showPosition,showError);
-                    }
-                    else{
-                        alert("Geolocation is not supported by this browser.");
-                    }
-                }
-                function showPosition(position)
-                {
-                    alert("Latitude: " + position.coords.latitude +
-                    "Longitude: " + position.coords.longitude);
-                }
-                function showError(error)
-                {
-                    switch(error.code)
-                    {
-                        case error.PERMISSION_DENIED:
-                            alert("User denied the request for Geolocation.");
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            alert("Location information is unavailable.");
-                            break;
-                        case error.TIMEOUT:
-                            alert("The request to get user location timed out.");
-                            break;
-                        case error.UNKNOWN_ERROR:
-                            alert("An unknown error occurred.");
-                            break;
-                    }
                 }
 
                 function clearWatcher(watchId) {
