@@ -8,7 +8,7 @@
                 var WidgetHome = this;
                 var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
                 GeoActions = new DB(COLLECTIONS.GeoActions);
-
+                var showOneTimeAlertFlag=true;
                 console.log('WidgetHomeCtrl loaded');
 
                 searchOptions = {
@@ -76,8 +76,13 @@
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                         function (err, position) {
                             //clearWatcher(position.watchId);
-                            if (err)
-                                alert("Enable your location service to use this plugin");
+                            if (err){
+                                if(showOneTimeAlertFlag){
+                                    alert("Enable your location service to use this plugin");
+                                    showOneTimeAlertFlag=false;
+                                }
+                            }
+
                             else {
                               //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
