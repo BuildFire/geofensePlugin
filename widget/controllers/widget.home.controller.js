@@ -8,7 +8,7 @@
                 var WidgetHome = this;
                 var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
                 GeoActions = new DB(COLLECTIONS.GeoActions);
-
+                var showOneTimeAlertFlag=true;
                 console.log('WidgetHomeCtrl loaded');
 
                 searchOptions = {
@@ -70,15 +70,21 @@
 
 
                 function watcherFun() {
+                   // getLocation();
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
-                        function (position, err) {
+                        function (err, position) {
                             //clearWatcher(position.watchId);
-                            if (err)
-                                console.error(err);
+                            if (err){
+                                if(showOneTimeAlertFlag){
+                                    alert("Enable your location service to use this plugin");
+                                    showOneTimeAlertFlag=false;
+                                }
+                            }
+
                             else {
-                                //alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
+                              //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     trigerAction(position.coords.latitude, position.coords.longitude);
@@ -89,7 +95,9 @@
 
                 function clearWatcher(watchId) {
                     Buildfire.geo.clearWatch(watchId, function (err, data) {
-                        console.info('Watcher has been cleared-----', err, data);
+                        if(err)
+                            alert(err);
+                        console.info('Watcher has been cleared-----GEO ERROR , DATA', err, data);
                         watcherFun();
                     })
                 }
