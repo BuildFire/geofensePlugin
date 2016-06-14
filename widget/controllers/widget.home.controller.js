@@ -74,7 +74,7 @@
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
-                        function (position, err) {
+                        function (err, position) {
                             //clearWatcher(position.watchId);
                             if (err)
                                 alert("GEO ERROR------------------->",err);
