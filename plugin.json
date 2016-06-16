@@ -15,7 +15,7 @@
   }
 }
 ,"widget":{
-
+	"enabled":false
 },
   "features" : ["GEO"],
   "languages" : ["en"]
