@@ -78,7 +78,7 @@
                             //clearWatcher(position.watchId);
                             alert("position" ,position);
                             alert("position==null" ,position==null);
-                            if (!position){
+                            if (!position.coords.latitude){
                                 if(showOneTimeAlertFlag){
                                     alert("Enable your location service to use this plugin");
                                     showOneTimeAlertFlag=false;
