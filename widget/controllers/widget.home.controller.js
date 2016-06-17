@@ -76,6 +76,8 @@
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                         function ( position,err) {
                             //clearWatcher(position.watchId);
+                            alert("position" ,position);
+                            alert("position==null" ,position==null);
                             if (!position){
                                 if(showOneTimeAlertFlag){
                                     alert("Enable your location service to use this plugin");
