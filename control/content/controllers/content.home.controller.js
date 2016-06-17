@@ -458,9 +458,6 @@
                         else {
                             ContentHome.geoAction.data.actionToPerform = {};
                         }
-                        if (result && result.action == "sendSms") {
-                            result.body = "Hello, How are you? This is a test message."
-                        }
                         $scope.$digest();
                     };
                     Buildfire.actionItems.showDialog(action, linkOptions, callback);
