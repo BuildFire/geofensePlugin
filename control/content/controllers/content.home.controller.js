@@ -235,7 +235,7 @@
                     ContentHome.geoAction.data.epicenter.coordinates = ContentHome.center;
                     ContentHome.center.lat = data.coordinates[1];
                     ContentHome.center.lng = data.coordinates[0];
-                    $scope.$digest();
+                    if (!$scope.$$phase)$scope.$digest();
                 };
 
                 /**
@@ -455,10 +455,7 @@
                         }
                         if (result)
                             ContentHome.geoAction.data.actionToPerform = result;
-                        else {
-                            ContentHome.geoAction.data.actionToPerform = {};
-                        }
-                        $scope.$digest();
+                        if (!$scope.$$phase)$scope.$digest();
                     };
                     Buildfire.actionItems.showDialog(action, linkOptions, callback);
                 };
