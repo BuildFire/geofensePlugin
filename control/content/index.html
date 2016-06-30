@@ -73,6 +73,15 @@
         <hr class="none">
         <div class="item clearfix row">
             <div class="labels col-xs-3 pull-left">
+                <span>Notification Message</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <textarea placeholder="Notification Message" class="form-control" ng-model="ContentHome.geoAction.data.notificationMessage"></textarea>
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
                 <span>Action to Perform</span>
             </div>
             <div class="main col-xs-9 pull-right">
@@ -86,6 +95,24 @@
                     {{value}}</p>
                 <!--<p class="info no-icon margin-top-ten">Action Selected: {{ContentHome.geoAction.data.actionToPerform.action}}</p>
                 <p class="info no-icon margin-zero">Link: {{ContentHome.geoAction.data.actionToPerform.url}}</p>-->
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Dismiss Button</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <input type="text" placeholder="Dismiss, Cancel, Close, etc." class="form-control" ng-model="ContentHome.geoAction.data.dismissButtonTitle">
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Action Button</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <input type="text" placeholder="Done, Ok, Go, etc." class="form-control" ng-model="ContentHome.geoAction.data.actionButtonTitle">
             </div>
         </div>
         <hr class="none">
