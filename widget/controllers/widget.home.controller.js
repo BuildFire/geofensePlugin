@@ -31,7 +31,6 @@
                     console.log('Item got based on the search------------------Widget Section-------', result);
                     GeoItems = result;
                     watcherFun();
-                    trigerAction(40, -75);
                 }, function (err) {
                     watcherFun();
                     console.error('Error while getting searched items---------------', err);
