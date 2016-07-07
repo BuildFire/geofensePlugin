@@ -28,8 +28,8 @@
                     title: '',
                     notificationMessage: '',
                     actionToPerform: {},
-                    dismissButtonTitle: '',
-                    actionButtonTitle: '',
+//                    dismissButtonTitle: '',
+//                    actionButtonTitle: '',
                     epicenter: {address: '', coordinates: {lat: '', long: ''}},
                     radius: 10 //in meters
                 }

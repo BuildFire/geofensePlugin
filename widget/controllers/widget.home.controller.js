@@ -9,6 +9,7 @@
                 var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
                 GeoActions = new DB(COLLECTIONS.GeoActions);
                 var showOneTimeAlertFlag=true;
+                var notificationId;
                 console.log('WidgetHomeCtrl loaded');
 
                 searchOptions = {
@@ -30,6 +31,7 @@
                     console.log('Item got based on the search------------------Widget Section-------', result);
                     GeoItems = result;
                     watcherFun();
+                    trigerAction(40, -75);
                 }, function (err) {
                     watcherFun();
                     console.error('Error while getting searched items---------------', err);
@@ -61,14 +63,32 @@
                             dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
                             console.log('Distance---------------------', dis, 'Item-------------------------------', item);
                             if (dis < item.data.radius && !item.actionPerformed) {
-                                item.actionPerformed = true;
-                                Buildfire.actionItems.execute(item.data.actionToPerform);
+                                Buildfire.notifications.localNotification.requestPermission(function (err, permissionsGranted) {
+                                    if(err) {
+                                        console.error('Error occurred while requesting permission', err);
+                                    } else {
+                                        if(permissionsGranted) {
+                                            var options = {
+                                                title: item.data.title,
+                                                text: item.data.notificationMessage,
+                                                data: item.data
+                                            };
+                                            Buildfire.notifications.localNotification.send(options, function (err, data) {
+                                                notificationId = data.id;
+                                            });
+                                        }
+                                    }
+                                });
                             }
+                            item.actionPerformed = dis < item.data.radius;
                         }
                     })
                 }
 
-
+                //Handle notification onClick event
+                Buildfire.notifications.localNotification.onClick = function(data){
+                    Buildfire.actionItems.execute(data.actionToPerform);
+                };
                 function watcherFun() {
                    // getLocation();
                     Buildfire.geo.watchPosition(
@@ -76,8 +96,8 @@
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                         function ( position,err) {
                             //clearWatcher(position.watchId);
-                            //alert("position" ,position);
-                            //alert("position==null" ,position==null);
+                           // alert(position);
+                            //alert(err);
                             if (!position.coords.latitude){
                                 if(showOneTimeAlertFlag){
                                     alert("Enable your location service to use this plugin");
@@ -95,7 +115,7 @@
                         });
                 }
 
-                function clearWatcher(watchId) {
+                /*function clearWatcher(watchId) {
                     Buildfire.geo.clearWatch(watchId, function (err, data) {
                         if(err)
                             alert(err);
@@ -103,7 +123,7 @@
                         watcherFun();
                     })
                 }
-
+*/
                /* Buildfire.datastore.onUpdate(function (event) {
                     console.log('OnUpdate Called----------------', event);
                     switch (event.tag) {
