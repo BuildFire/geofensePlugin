@@ -7,10 +7,8 @@
             function ($scope, $timeout, COLLECTIONS, DB, Buildfire) {
                 var WidgetHome = this;
                 var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
-                GeoActions = new DB(COLLECTIONS.GeoActions);
                 var showOneTimeAlertFlag=true;
                 var notificationId;
-                console.log('WidgetHomeCtrl loaded');
 
                 searchOptions = {
                     filter: {"$json.title": {"$regex": '/*'}},
@@ -18,23 +16,36 @@
                     limit: _limit + 1 // the plus one is to check if there are any more
                 };
 
-                GeoInfo = new DB(COLLECTIONS.GeoInfo);
-                GeoInfo.get().then(function (data) {
-                    console.log('Got Info in Widget------------', data);
-                    info = data;
-                }, function (err) {
-                    info = null;
-                    console.error('Got Error while getting geoInfo------', err);
-                });
+                function init() {
+                    GeoInfo = new DB(COLLECTIONS.GeoInfo);
+                    GeoInfo.get().then(function (data) {
+                        console.log('Got Info in Widget------------', data);
+                        info = data;
+                    }, function (err) {
+                        info = null;
+                        console.error('Got Error while getting geoInfo------', err);
+                    });
 
-                GeoActions.find(searchOptions).then(function (result) {
-                    console.log('Item got based on the search------------------Widget Section-------', result);
-                    GeoItems = result;
-                    watcherFun();
-                }, function (err) {
-                    watcherFun();
-                    console.error('Error while getting searched items---------------', err);
-                });
+                    GeoActions = new DB(COLLECTIONS.GeoActions);
+                    GeoActions.find(searchOptions).then(function (result) {
+                        console.log('Item got based on the search------------------Widget Section-------', result);
+                        GeoItems = result;
+                        watcherFun();
+                    }, function (err) {
+                        watcherFun();
+                        console.error('Error while getting searched items---------------', err);
+                    });
+
+                    //Handle notification onClick event
+                    Buildfire.notifications.localNotification.onClick = function (data) {
+                        Buildfire.actionItems.execute(data.actionToPerform);
+                    };
+
+                    // Load Items again on Refresh
+                    Buildfire.datastore.onRefresh(function(){
+                        init();
+                    });
+                }
 
                 function distance(lat1, lon1, lat2, lon2, unit) {
                     var radlat1 = Math.PI * lat1 / 180;
@@ -55,7 +66,7 @@
                 }
 
 
-                function trigerAction(lat, lng) {
+                function triggerAction(lat, lng) {
                     GeoItems.forEach(function (item) {
                         var dis;
                         if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
@@ -84,19 +95,12 @@
                     })
                 }
 
-                //Handle notification onClick event
-                Buildfire.notifications.localNotification.onClick = function(data){
-                    Buildfire.actionItems.execute(data.actionToPerform);
-                };
                 function watcherFun() {
                    // getLocation();
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                         function ( position,err) {
-                            //clearWatcher(position.watchId);
-                           // alert(position);
-                            //alert(err);
                             if (!position.coords.latitude){
                                 if(showOneTimeAlertFlag){
                                     alert("Enable your location service to use this plugin");
@@ -105,33 +109,14 @@
                             }
 
                             else {
-                              //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
-                                    trigerAction(position.coords.latitude, position.coords.longitude);
+                                    triggerAction(position.coords.latitude, position.coords.longitude);
                                 }
                             }
                         });
                 }
 
-                /*function clearWatcher(watchId) {
-                    Buildfire.geo.clearWatch(watchId, function (err, data) {
-                        if(err)
-                            alert(err);
-                        console.info('Watcher has been cleared-----GEO ERROR , DATA', err, data);
-                        watcherFun();
-                    })
-                }
-*/
-               /* Buildfire.datastore.onUpdate(function (event) {
-                    console.log('OnUpdate Called----------------', event);
-                    switch (event.tag) {
-                        case COLLECTIONS.GeoInfo:
-                            info=event;
-                            break;
-                        case COLLECTIONS.GeoActions:
-                    }
-                });
-*/
+                init();
             }]);
 })(window.angular);
