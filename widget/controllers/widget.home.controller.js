@@ -8,7 +8,6 @@
                 var WidgetHome = this;
                 var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
                 GeoActions = new DB(COLLECTIONS.GeoActions);
-                var showOneTimeAlertFlag=true;
                 console.log('WidgetHomeCtrl loaded');
 
                 searchOptions = {
@@ -70,23 +69,33 @@
 
 
                 function watcherFun() {
+                    $scope.latitude = 0;
+                    $scope.longitude = 0;
+
                    // getLocation();
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
-                        function (err, position) {
+                        function (position, err) {
+
                             //clearWatcher(position.watchId);
                             if (err){
-                                if(showOneTimeAlertFlag){
-                                    alert("Enable your location service to use this plugin");
-                                    showOneTimeAlertFlag=false;
-                                }
+                                $scope.status = "Unable to get location";
+                                $scope.$apply();
+
+                                console.error("Unable to get location");
                             }
 
                             else {
+                                
                               //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
+                                    $scope.latitude = position.coords.latitude;
+                                    $scope.longitude = position.coords.longitude;
+                                    $scope.status = "";
+                                    $scope.$apply();
+
                                     trigerAction(position.coords.latitude, position.coords.longitude);
                                 }
                             }
