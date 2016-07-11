@@ -98,17 +98,14 @@
                 function watcherFun() {
                    // getLocation();
                     Buildfire.geo.watchPosition(
-                        //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
-                        function ( position,err) {
-                            if (!position.coords.latitude){
-                                if(showOneTimeAlertFlag){
-                                    alert("Enable your location service to use this plugin");
+                        function (position) {
+                            if (!position.coords.latitude) {
+                                if(showOneTimeAlertFlag) {
+                                    Buildfire.notifications.alert({message: "Enable your location service to use this plugin"});
                                     showOneTimeAlertFlag=false;
                                 }
-                            }
-
-                            else {
+                            } else {
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     triggerAction(position.coords.latitude, position.coords.longitude);
