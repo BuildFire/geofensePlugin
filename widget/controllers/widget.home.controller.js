@@ -76,29 +76,17 @@
                     Buildfire.geo.watchPosition(
                         //{timeout:3000},
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
-                        function (position, err) {
-
-                            //clearWatcher(position.watchId);
-                            if (err){
-                                $scope.status = "Unable to get location";
+                        function (position) {
+                          //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
+                            console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
+                            if (position && position.coords && position.coords.latitude && position.coords.longitude) {
+                                $scope.latitude = position.coords.latitude;
+                                $scope.longitude = position.coords.longitude;
                                 $scope.$apply();
 
-                                console.error("Unable to get location");
+                                trigerAction(position.coords.latitude, position.coords.longitude);
                             }
 
-                            else {
-                                
-                              //  alert('Watcher Called-----------' + position.watchId + ' location----' + position.coords.latitude + ',' + position.coords.longitude + ' accuracy:' + info.data.highAccuracy);
-                                console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
-                                if (position && position.coords && position.coords.latitude && position.coords.longitude) {
-                                    $scope.latitude = position.coords.latitude;
-                                    $scope.longitude = position.coords.longitude;
-                                    $scope.status = "";
-                                    $scope.$apply();
-
-                                    trigerAction(position.coords.latitude, position.coords.longitude);
-                                }
-                            }
                         });
                 }
 
