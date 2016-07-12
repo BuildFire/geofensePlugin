@@ -96,6 +96,9 @@
                 }
 
                 function watcherFun() {
+                    $scope.latitude = 0;
+                    $scope.longitude = 0;
+
                    // getLocation();
                     Buildfire.geo.watchPosition(
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
@@ -107,6 +110,9 @@
                                 }
                             } else {
                                 console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
+                                $scope.latitude = position.coords.latitude;
+                                $scope.longitude = position.coords.longitude;
+                                $scope.$apply();
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     triggerAction(position.coords.latitude, position.coords.longitude);
                                 }

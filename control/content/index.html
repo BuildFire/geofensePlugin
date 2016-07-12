@@ -29,9 +29,7 @@
 <body ng-controller="ContentHomeCtrl as ContentHome">
 <div class="item clearfix row">
     <div class="col-xs-4 col-xs-offset-4 pull-left margin-left-ten">
-        <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add
-            New Geo
-            Action</a>
+        <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add New Geo Action</a>
     </div>
     <div class="col-xs-4 col-xs-offset-1 pull-right checkbox checkbox-primary">
         <input id="checkboxid" type="checkbox" ng-change="ContentHome.saveInfo()" ng-model="ContentHome.geoInfo.data.highAccuracy" ng-checked="ContentHome.geoInfo.data.highAccuracy">

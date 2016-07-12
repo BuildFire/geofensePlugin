@@ -15,8 +15,8 @@
   }
 }
 ,"widget":{
-
+	"enabled":true
 },
-  "features" : [{"name" : "Geo"}, {"name": "localNotification"}],
+  "features" : [{"name" : "Geo"}],
   "languages" : ["en"]
 }
