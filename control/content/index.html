@@ -28,10 +28,10 @@
 </head>
 <body ng-controller="ContentHomeCtrl as ContentHome">
 <div class="item clearfix row">
-    <div class="col-xs-4 col-xs-offset-4 pull-left">
+    <div class="col-xs-4 col-xs-offset-4 pull-left margin-left-ten">
         <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add New Geo Action</a>
     </div>
-    <div class="col-xs-4 col-xs-offset-4 text-center pull-left checkbox checkbox-primary">
+    <div class="col-xs-4 col-xs-offset-1 pull-right checkbox checkbox-primary">
         <input id="checkboxid" type="checkbox" ng-change="ContentHome.saveInfo()" ng-model="ContentHome.geoInfo.data.highAccuracy" ng-checked="ContentHome.geoInfo.data.highAccuracy">
         <label for="checkboxid">Enable High Accuracy</label>
     </div>
@@ -71,6 +71,15 @@
         <hr class="none">
         <div class="item clearfix row">
             <div class="labels col-xs-3 pull-left">
+                <span>Notification Message</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <textarea placeholder="Notification Message" class="form-control" ng-model="ContentHome.geoAction.data.notificationMessage"></textarea>
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
                 <span>Action to Perform</span>
             </div>
             <div class="main col-xs-9 pull-right">
@@ -87,6 +96,24 @@
             </div>
         </div>
         <hr class="none">
+        <!--<div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Dismiss Button</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <input type="text" placeholder="Dismiss, Cancel, Close, etc." class="form-control" ng-model="ContentHome.geoAction.data.dismissButtonTitle">
+            </div>
+        </div>
+        <hr class="none">
+        <div class="item clearfix row">
+            <div class="labels col-xs-3 pull-left">
+                <span>Action Button</span>
+            </div>
+            <div class="main col-xs-9 pull-right">
+                <input type="text" placeholder="Done, Ok, Go, etc." class="form-control" ng-model="ContentHome.geoAction.data.actionButtonTitle">
+            </div>
+        </div>
+        <hr class="none">-->
         <div class="item clearfix row">
             <div class="labels col-xs-3 pull-left">
                 <span>Epicenter</span>
@@ -96,7 +123,6 @@
                        id="googleMapAutocomplete"
                        google-location-search callback-fn="ContentHome.setLocation(data)"
                        ng-model="ContentHome.selectedLocation"
-                       ng-model="ContentHome.center"
                        ng-enter="ContentHome.setCoordinates()"
                        ng-paste="ContentHome.locationAutocompletePaste()"
                        ng-change="ContentHome.clearData()">
@@ -117,16 +143,16 @@
                 <span>Radius</span>
             </div>
             <div class="main col-xs-9 pull-right">
-                <div class="col-xs-4 pull-left padding-left-zero">
+                <div class="col-xs-3 pull-left padding-zero">
                     <input type="number" placeholder="0" class="form-control text-center"
                            ng-model="ContentHome.radiusMiles"
                            ng-change="ContentHome.updateRadius()"
                            onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                 </div>
-                <div class="col-xs-2 pull-left padding-zero text-center margin-top-five small">
+                <div class="col-xs-4 pull-left padding-zero text-center margin-top-five small">
                     Miles and
                 </div>
-                <div class="col-xs-4 pull-left padding-right-zero">
+                <div class="col-xs-3 pull-left padding-zero">
                     <input type="number" placeholder="0" class="form-control text-center" ng-max="5279"
                            ng-model="ContentHome.radiusFeet"
                            ng-change="ContentHome.updateRadius()"
@@ -146,14 +172,17 @@
         </div>
         <hr class="none">
         <div class="item clearfix row">
-            <div class="labels col-xs-3 pull-left">
+            <div class="labels col-xs-4 pull-left">
                 <span>Affected Area</span>
             </div>
-			<div class="main col-xs-9 pull-right">
-	          <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"
-	               google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
-	        </div>
         </div>
+      <hr class="none">
+      <div class="item clearfix row">
+        <div class="main col-xs-9 pull-right">
+          <div style="height:280px; width:100%; background:#eef0f0;" google-map="{{ContentHome.center}}"
+               google-map-radius="{{ContentHome.geoAction.data.radius}}"></div>
+        </div>
+      </div>
     </div>
 </div>
 </body>
