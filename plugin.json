@@ -15,8 +15,8 @@
   }
 }
 ,"widget":{
-	"enabled":false
+	"enabled":true
 },
-  "features" : ["GEO"],
+  "features" : [{"name" : "Geo"}],
   "languages" : ["en"]
 }
