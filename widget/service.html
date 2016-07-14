@@ -5,7 +5,7 @@
     <script src="../../../scripts/buildfire.js"></script>
     <script src="../../../scripts/buildfire/services/notifications/localNotifications.js"></script>
     <script>
-        var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
+        var _skip = 0, _limit = 50, searchOptions, GeoItems = [], info;
         var showOneTimeAlertFlag=true;
         var notificationId;
 
@@ -15,74 +15,34 @@
             limit: _limit + 1 // the plus one is to check if there are any more
         };
 
-        function DB(tagName) {
-            this._tagName = tagName;
-        }
-
-        DB.prototype.get = function () {
-            var that = this;
-            var deferred = $q.defer();
-            buildfire.datastore.get(that._tagName, function (err, result) {
-                if (err && err.code == 'NOTFOUND') {
-                    return deferred.resolve();
-                }
-                else if (err) {
-                    return deferred.reject(err);
-                }
-                else {
-                    return deferred.resolve(result);
+        function init() {
+            buildfire.datastore.get("geoInfo", function(err, result) {
+                if(err) {
+                    info = null;
+                    console.error('Got Error while getting geoInfo------', err);
+                } else {
+                    console.log('Got Info in Widget------------', result);
+                    info = result;
                 }
             });
-            return deferred.promise;
-        };
-        DB.prototype.find = function (options) {
-            var that = this;
-            var deferred = $q.defer();
-            if (typeof options == 'undefined') {
-                return deferred.reject(new Error('Requires options'));
-            }
-            buildfire.datastore.search(options, that._tagName, function (err, result) {
+
+            buildfire.datastore.search(searchOptions, "geoActions", function (err, result) {
                 if (err) {
-                    return deferred.reject(err);
+                    console.error('Error while getting searched items---------------', err);
                 }
                 else if (result) {
-                    return deferred.resolve(result);
+                    console.log('Item got based on the search------------------Widget Section-------', result);
+                    GeoItems = result;
                 } else {
-                    return deferred.reject(new Error('No result found'));
+                    console.error('No result found');
                 }
-            });
-            return deferred.promise;
-        };
-
-        function init() {
-            GeoInfo = new DB("geoInfo");
-            GeoInfo.get().then(function (data) {
-                console.log('Got Info in Widget------------', data);
-                info = data;
-            }, function (err) {
-                info = null;
-                console.error('Got Error while getting geoInfo------', err);
-            });
-
-            GeoActions = new DB("geoActions");
-            GeoActions.find(searchOptions).then(function (result) {
-                console.log('Item got based on the search------------------Widget Section-------', result);
-                GeoItems = result;
                 watcherFun();
-            }, function (err) {
-                watcherFun();
-                console.error('Error while getting searched items---------------', err);
             });
 
             //Handle notification onClick event
             buildfire.notifications.localNotification.onClick = function (data) {
                 buildfire.actionItems.execute(data.actionToPerform);
             };
-
-            /*// Load Items again on Refresh
-            buildfire.datastore.onRefresh(function(){
-                init();
-            });*/
         }
 
         function distance(lat1, lon1, lat2, lon2, unit) {
@@ -111,32 +71,28 @@
                     dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
                     console.log('Distance---------------------', dis, 'Item-------------------------------', item);
                     if (dis < item.data.radius && !item.actionPerformed) {
-                        item.actionPerformed = dis < item.data.radius;
-                        buildfire.notifications.localNotification.requestPermission(function (permissionsGranted) {
-                            if(permissionsGranted) {
-                                var options = {
-                                    title: item.data.title,
-                                    text: item.data.notificationMessage,
-                                    data: item.data
-                                };
-                                buildfire.notifications.localNotification.send(options, function (err, data) {
-                                    notificationId = data.id;
-                                });
-                            }
+                        var options = {
+                            title: item.data.title,
+                            text: item.data.notificationMessage,
+                            data: item.data
+                        };
+                        buildfire.notifications.localNotification.send(options, function (err, data) {
+                            notificationId = data.id;
+                            console.log("localnotification send method callback :::::", data);
                         });
                     }
+                    item.actionPerformed = dis < item.data.radius;
                 }
             })
         }
 
         function watcherFun() {
-            /*$scope.latitude = 0;
-            $scope.longitude = 0;*/
+            console.log("Inside watcherFun method--------");
 
-            // getLocation();
             buildfire.geo.watchPosition(
                     {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                     function (position) {
+                        console.log('Position is :::::::::::', position);
                         if (!position.coords.latitude) {
                             if(showOneTimeAlertFlag) {
                                 buildfire.notifications.alert({message: "Enable your location service to use this plugin"});
@@ -144,9 +100,6 @@
                             }
                         } else {
                             console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
-                            /*$scope.latitude = position.coords.latitude;
-                            $scope.longitude = position.coords.longitude;
-                            $scope.$apply();*/
                             if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                 triggerAction(position.coords.latitude, position.coords.longitude);
                             }
