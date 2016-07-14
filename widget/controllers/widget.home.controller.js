@@ -73,10 +73,8 @@
                             dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
                             console.log('Distance---------------------', dis, 'Item-------------------------------', item);
                             if (dis < item.data.radius && !item.actionPerformed) {
-                                Buildfire.notifications.localNotification.requestPermission(function (err, permissionsGranted) {
-                                    if(err) {
-                                        console.error('Error occurred while requesting permission', err);
-                                    } else {
+                                item.actionPerformed = dis < item.data.radius;
+                                Buildfire.notifications.localNotification.requestPermission(function (permissionsGranted) {
                                         if(permissionsGranted) {
                                             var options = {
                                                 title: item.data.title,
@@ -87,10 +85,8 @@
                                                 notificationId = data.id;
                                             });
                                         }
-                                    }
                                 });
                             }
-                            item.actionPerformed = dis < item.data.radius;
                         }
                     })
                 }

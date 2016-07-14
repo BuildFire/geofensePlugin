@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="buildfire" content="disableTheme,disableFastClick">
+    <script src="../../../scripts/buildfire.js"></script>
+    <script src="../../../scripts/buildfire/services/notifications/localNotifications.js"></script>
+    <script>
+        var _skip = 0, _limit = 50, searchOptions, GeoActions, GeoItems = [], GeoInfo, info;
+        var showOneTimeAlertFlag=true;
+        var notificationId;
+
+        searchOptions = {
+            filter: {"$json.title": {"$regex": '/*'}},
+            skip: _skip,
+            limit: _limit + 1 // the plus one is to check if there are any more
+        };
+
+        function DB(tagName) {
+            this._tagName = tagName;
+        }
+
+        DB.prototype.get = function () {
+            var that = this;
+            var deferred = $q.defer();
+            buildfire.datastore.get(that._tagName, function (err, result) {
+                if (err && err.code == 'NOTFOUND') {
+                    return deferred.resolve();
+                }
+                else if (err) {
+                    return deferred.reject(err);
+                }
+                else {
+                    return deferred.resolve(result);
+                }
+            });
+            return deferred.promise;
+        };
+        DB.prototype.find = function (options) {
+            var that = this;
+            var deferred = $q.defer();
+            if (typeof options == 'undefined') {
+                return deferred.reject(new Error('Requires options'));
+            }
+            buildfire.datastore.search(options, that._tagName, function (err, result) {
+                if (err) {
+                    return deferred.reject(err);
+                }
+                else if (result) {
+                    return deferred.resolve(result);
+                } else {
+                    return deferred.reject(new Error('No result found'));
+                }
+            });
+            return deferred.promise;
+        };
+
+        function init() {
+            GeoInfo = new DB("geoInfo");
+            GeoInfo.get().then(function (data) {
+                console.log('Got Info in Widget------------', data);
+                info = data;
+            }, function (err) {
+                info = null;
+                console.error('Got Error while getting geoInfo------', err);
+            });
+
+            GeoActions = new DB("geoActions");
+            GeoActions.find(searchOptions).then(function (result) {
+                console.log('Item got based on the search------------------Widget Section-------', result);
+                GeoItems = result;
+                watcherFun();
+            }, function (err) {
+                watcherFun();
+                console.error('Error while getting searched items---------------', err);
+            });
+
+            //Handle notification onClick event
+            buildfire.notifications.localNotification.onClick = function (data) {
+                buildfire.actionItems.execute(data.actionToPerform);
+            };
+
+            /*// Load Items again on Refresh
+            buildfire.datastore.onRefresh(function(){
+                init();
+            });*/
+        }
+
+        function distance(lat1, lon1, lat2, lon2, unit) {
+            var radlat1 = Math.PI * lat1 / 180;
+            var radlat2 = Math.PI * lat2 / 180;
+            var theta = lon1 - lon2;
+            var radtheta = Math.PI * theta / 180;
+            var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+            dist = Math.acos(dist);
+            dist = dist * 180 / Math.PI;
+            dist = dist * 60 * 1.1515;
+            if (unit == "K") {
+                dist = dist * 1.609344
+            }
+            if (unit == "N") {
+                dist = dist * 0.8684
+            }
+            return dist;
+        }
+
+
+        function triggerAction(lat, lng) {
+            GeoItems.forEach(function (item) {
+                var dis;
+                if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
+                    dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
+                    console.log('Distance---------------------', dis, 'Item-------------------------------', item);
+                    if (dis < item.data.radius && !item.actionPerformed) {
+                        item.actionPerformed = dis < item.data.radius;
+                        buildfire.notifications.localNotification.requestPermission(function (permissionsGranted) {
+                            if(permissionsGranted) {
+                                var options = {
+                                    title: item.data.title,
+                                    text: item.data.notificationMessage,
+                                    data: item.data
+                                };
+                                buildfire.notifications.localNotification.send(options, function (err, data) {
+                                    notificationId = data.id;
+                                });
+                            }
+                        });
+                    }
+                }
+            })
+        }
+
+        function watcherFun() {
+            /*$scope.latitude = 0;
+            $scope.longitude = 0;*/
+
+            // getLocation();
+            buildfire.geo.watchPosition(
+                    {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
+                    function (position) {
+                        if (!position.coords.latitude) {
+                            if(showOneTimeAlertFlag) {
+                                buildfire.notifications.alert({message: "Enable your location service to use this plugin"});
+                                showOneTimeAlertFlag=false;
+                            }
+                        } else {
+                            console.info('Watching Position------watchId:::', position.watchId, position,' accuracy:' + info.data.highAccuracy ,info);
+                            /*$scope.latitude = position.coords.latitude;
+                            $scope.longitude = position.coords.longitude;
+                            $scope.$apply();*/
+                            if (position && position.coords && position.coords.latitude && position.coords.longitude) {
+                                triggerAction(position.coords.latitude, position.coords.longitude);
+                            }
+                        }
+                    });
+        }
+
+        init();
+    </script>
+</head>
+</html>
