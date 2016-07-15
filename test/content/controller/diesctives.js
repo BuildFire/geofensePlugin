@@ -24,7 +24,7 @@ describe('Unit testing Directives', function() {
         // Check that the compiled element contains the templated content
        // expect(element.html()).toContain("lidless, wreathed in flame, 2 times");
     });
-    it('Replaces the element with the appropriate googleMap content', function() {
+    xit('Replaces the element with the appropriate googleMap content', function() {
         // Compile a piece of HTML containing the directive
         var element = $compile("<div google-map=''></div>")($rootScope);
         // fire all the watches, so the scope expression {{1 + 1}} will be evaluated
