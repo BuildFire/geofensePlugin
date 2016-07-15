@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="buildfire" content="disableTheme,disableFastClick">
+    <script src="../../../scripts/buildfire.js"></script>
+    <script src="../../../scripts/buildfire/services/notifications/localNotifications.js"></script>
+    <script>
+        (function () {
+            var _skip = 0, _limit = 50, searchOptions, GeoItems = [],
+                    info, showOneTimeAlertFlag = true, notificationId,
+                    coolDownPeriodInHours = 24;
+
+            var searchOptions = {
+                filter: {"$json.title": {"$regex": '/*'}},
+                skip: _skip,
+                limit: _limit + 1 // the plus one is to check if there are any more
+            };
+
+            function init() {
+                buildfire.datastore.get("geoInfo", function (err, result) {
+                    if (err) {
+                        info = null;
+                        console.error('Got Error while getting geoInfo------', err);
+                    } else {
+                        console.log('Got Info in Widget------------', result);
+                        info = result;
+                    }
+                });
+
+                buildfire.datastore.search(searchOptions, "geoActions", function (err, result) {
+                    if (err) {
+                        console.error('Error while getting searched items---------------', err);
+                    }
+                    else if (result) {
+                        console.log('Item got based on the search------------------Widget Section-------', result);
+                        GeoItems = result;
+                    } else {
+                        console.error('No result found');
+                    }
+                    watcherFun();
+                });
+
+                //Handle notification onClick event
+                buildfire.notifications.localNotification.onClick = function (data) {
+                    buildfire.actionItems.execute(data.actionToPerform);
+                };
+            }
+
+            function distance(lat1, lon1, lat2, lon2, unit) {
+                var radlat1 = Math.PI * lat1 / 180;
+                var radlat2 = Math.PI * lat2 / 180;
+                var theta = lon1 - lon2;
+                var radtheta = Math.PI * theta / 180;
+                var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+                dist = Math.acos(dist);
+                dist = dist * 180 / Math.PI;
+                dist = dist * 60 * 1.1515;
+                if (unit == "K") {
+                    dist = dist * 1.609344
+                }
+                if (unit == "N") {
+                    dist = dist * 0.8684
+                }
+                return dist;
+            }
+
+
+            function triggerAction(lat, lng) {
+                var dis, difference, hoursDifference;
+                GeoItems.forEach(function (item) {
+                    if (item.notificationDisplayTime) {
+                        difference = new Date().getTime() - item.notificationDisplayTime;
+                        hoursDifference = Math.floor(difference / 1000 / 60 / 60);
+                        item.actionPerformed = hoursDifference < coolDownPeriodInHours;
+                    }
+                    if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
+                        dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
+                        console.log('Distance---------------------', dis, 'Item-------------------------------', item);
+                        if (dis < item.data.radius && !item.actionPerformed) {
+                            item.notificationDisplayTime = new Date().getTime();
+                            var options = {
+                                title: item.data.title,
+                                text: item.data.notificationMessage,
+                                data: item.data
+                            };
+                            buildfire.notifications.localNotification.send(options, function (err, data) {
+                                notificationId = data.id;
+                                console.log("local notification send method callback :::::", data);
+                            });
+                        }
+                        item.actionPerformed = dis < item.data.radius;
+                    }
+                })
+            }
+
+            function watcherFun() {
+                console.log("Inside watcherFun method--------");
+
+                buildfire.geo.watchPosition(
+                        {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
+                        function (position) {
+                            console.log('Position is :::::::::::', position);
+                            if (!position.coords.latitude) {
+                                if (showOneTimeAlertFlag) {
+                                    buildfire.notifications.alert({message: "Enable your location service to use this plugin"});
+                                    showOneTimeAlertFlag = false;
+                                }
+                            } else {
+                                console.info('Watching Position------watchId:::', position.watchId, position, ' accuracy:' + info.data.highAccuracy, info);
+                                if (position && position.coords && position.coords.latitude && position.coords.longitude) {
+                                    triggerAction(position.coords.latitude, position.coords.longitude);
+                                }
+                            }
+                        });
+            }
+
+            init();
+        })();
+    </script>
+</head>
+</html>

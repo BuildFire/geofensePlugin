@@ -95,7 +95,7 @@ var buildfire = {
                     option.value = toggleClass;
                     select.appendChild(option);
                 }
-                
+
                 createFilterOption('Show all','');
                 createFilterOption('Info logs only','bflog-info');
                 createFilterOption('Logs only','bflog-log');
@@ -252,7 +252,14 @@ var buildfire = {
                 }
         }
     }
-    , context: null
+    , _context: null
+    , get context() {
+        console.warn('buildfire.context is obsolete and will be removed soon');
+        return buildfire._context;
+    }
+    , set context(obj) {
+        buildfire._context = obj;
+    }
     , init: function () {
         // Listen to message from child window
         window.removeEventListener('message', buildfire._postMessageHandler, false);
@@ -260,19 +267,7 @@ var buildfire = {
 
         buildfire.logger.init();
         //buildfire.logger.showHistory();
-        buildfire.getContext(function (err, context) {
-            if (err) {
-                console.error(err);
-            }
-            else {
-                buildfire.context = context;
-                if(context.debugTag)
-                    buildfire.logger.attachRemoteLogger(context.debugTag);
-                if (window.location.pathname.indexOf('/widget/') > 0) {
-                    buildfire.appearance.attachAppThemeCSSFiles(context.appId, context.liveMode, context.endPoints.appHost);
-                }
-            }
-        });
+
 
         buildfire.appearance.insertHTMLAttributes();
         buildfire.appearance.attachCSSFiles();
@@ -286,7 +281,12 @@ var buildfire = {
         , "auth.triggerOnLogin"
         , "auth.triggerOnLogout"
         , "logger.showHistory"
-        , "logger.attachRemoteLogger"]
+        , "logger.attachRemoteLogger"
+        , "appearance.triggerOnUpdate"
+        , "services.bluetooth.ble.onConnect"
+        , "services.bluetooth.ble.onDisconnect"
+        , "services.bluetooth.ble._onSubscribeData"
+    ]
     , _postMessageHandler: function (e) {
         if (e.source === window) {
             console.log(' >>>> IGNORE MESSAGE <<<< ');
@@ -326,24 +326,40 @@ var buildfire = {
                 console.info('buildfire.js ignored callback ' + JSON.stringify(arguments));
             };
 
+
+        // Commented the code to prevent the multiple insert hits
+
         var timeout = setTimeout(function () {
             console.warn('plugin never received a callback ' + packet.cmd, packet, window.location.href);
-            if(packet.cmd.indexOf('datastore') == 0 && buildfire._resendAttempts < 15){
-                console.warn("calling" + packet.cmd + ' again! total overall resend attempts ' + buildfire._resendAttempts);
-                buildfire._sendPacket(packet,function(e,d){
-                    buildfire._resendAttempts--;
-                    callback(e,d);
-                });
-                buildfire._resendAttempts++;
+            if(buildfire._resendAttempts < 15) {
+                var rerun ;
+
+                if (packet.cmd.indexOf('datastore') == 0
+                    && packet.cmd.indexOf('datastore.insert') != 0
+                    && packet.cmd.indexOf('datastore.disableRefresh') != 0
+                )
+                    rerun=true;
+                else if (packet.cmd.indexOf('getContext') == 0 )
+                    rerun=true;
+
+                if(rerun)
+                {
+                    console.warn("calling" + packet.cmd + ' again! total overall resend attempts ' + buildfire._resendAttempts);
+                    buildfire._sendPacket(packet, function (e, d) {
+                        buildfire._resendAttempts--;
+                        callback(e, d);
+                    });
+                    buildfire._resendAttempts++;
+                }
             }
-        }, 1000);
+        }, packet.cmd.indexOf('getContext') == 0? 250 : 1000);
+
         var wrapper = function (err, data) {
-            clearTimeout(timeout);
+            clearTimeout(timeout); // commented this to remove the 'timeout is not defined' error.
             callback(err, data);
         };
 
         buildfire._callbacks[packet.id] = wrapper;
-
         packet.fid= buildfire.fid;
         var p;
         if (typeof(angular) != "undefined")
@@ -351,12 +367,24 @@ var buildfire = {
         else
             p = JSON.stringify(packet);
 
+
         console.info("BuildFire.js Send >> " + p, window.location.href);
-        if (parent)parent.postMessage(p, "*");
+        buildfire._parentPost(p,callback);  //if (parent)parent.postMessage(p, "*");
+    }
+    ,_parentPost: function (packet) {
+        if (parent)parent.postMessage(packet, "*");
     }
     , getContext: function (callback) {
-        var p = new Packet(null, 'getContext');
-        buildfire._sendPacket(p, callback);
+        if (buildfire._context)
+            callback(null, buildfire._context);
+        else {
+            var p = new Packet(null, 'getContext');
+            buildfire._sendPacket(p, function (err, data) {
+                if (data)
+                    buildfire._context = data;
+                callback(err, data);
+            });
+        }
     }
     /// ref: https://github.com/BuildFire/sdk/wiki/How-to-use-Navigation
     , navigation: {
@@ -384,6 +412,10 @@ var buildfire = {
         , navigateHome: function () {
             var p = new Packet(null, 'navigation.navigateHome');
             buildfire._sendPacket(p);
+        }
+        , scrollTop: function(callback){
+            var p = new Packet(null, 'navigation.scrollTop');
+            buildfire._sendPacket(p,callback);
         }
         , openWindow: function (url, target, callback) {
             if (!target) target = '_blank';
@@ -413,17 +445,44 @@ var buildfire = {
         , goBack: function () {
             buildfire.navigation.onBackButtonClick();
         }
+        , makeSafeLinks: function (element) {
+            var t = this;
+            if (typeof(element) != "object")
+                element = document.getElementById(element);
+
+            var anchors = element.querySelectorAll('a[href^=http], a[href^=https],a[href^=www]');
+            for (var i = 0; i < anchors.length; i++) {
+                anchors[i].setAttribute("inAppBrowser",true);
+                anchors[i].addEventListener("click", function (evt) {
+                    evt.preventDefault();
+                    t.openWindow(this.href, this.target, null);
+                }, false);
+            }
+        }
+        , navigateEmulator: function(){
+            buildfire._sendPacket(new Packet(null, 'navigation.navigateEmulator'));
+        }
     }
     /// ref: https://github.com/BuildFire/sdk/wiki/How-to-use-Appearance
     , appearance: {
-         insertHTMLAttributes: function () {
-            var html = document.getElementsByTagName('html')[0];
-		
+		_forceCSSRender: function(){
+			// WebKit Rendering Reset on Plugins
 			if(window.location.href.indexOf('widget') > 0){
-				html.setAttribute('buildfire', 'widget');          
-			}else{
-	            html.setAttribute('buildfire', 'control');				
+				var html = document.getElementsByTagName('html')[0];
+				var style = document.createElement('style');
+				style.type = 'text/css';
+				style.innerHTML = 'body{position:relative !important; z-index:1 !important;}';
+				html.appendChild(style);
 			}
+		},
+        insertHTMLAttributes: function () {
+            var html = document.getElementsByTagName('html')[0];
+
+            if(window.location.href.indexOf('widget') > 0){
+                html.setAttribute('buildfire', 'widget');
+            }else{
+                html.setAttribute('buildfire', 'control');
+            }
 
             var nVer = navigator.appVersion;
             var nAgt = navigator.userAgent;
@@ -521,6 +580,7 @@ var buildfire = {
                 document.write('<link rel="stylesheet" href="' + base + files[i] + '"/>');
 
         }
+        , disableFastClickOnLoad:false
         , attachFastClick: function(){
 
             var path;
@@ -560,21 +620,27 @@ var buildfire = {
         }
         , attachAppThemeCSSFiles: function (appId, liveMode, appHost) {
             var linkElement = document.createElement("link");
+            buildfire.appearance.CSSBusterCounter = 0;
             linkElement.setAttribute("rel", "stylesheet");
             linkElement.setAttribute("type", "text/css");
-            linkElement.setAttribute("href", appHost + '/api/app/styles/appTheme.css?appId=' + appId + '&liveMode=' + liveMode);
+            linkElement.setAttribute("id", "appThemeCSS");
+            linkElement.setAttribute("href", appHost + '/api/app/styles/appTheme.css?appId=' + appId + '&liveMode=' + liveMode + '&v=' + buildfire.appearance.CSSBusterCounter);
             document.getElementsByTagName('head')[0].appendChild(linkElement);
         }
         , _resizedTo: 0
         , autosizeContainer: function () {
-            var height = Math.max(
-                document.documentElement.clientHeight,
-                document.body.scrollHeight,
-                document.documentElement.scrollHeight,
-                document.body.offsetHeight,
-                document.documentElement.offsetHeight
-            );
-            if (buildfire.appearance._resizedTo == height || height < 100) return;
+            var height;
+            try {
+                height = Math.max(
+                    document.documentElement.clientHeight,
+                    document.body.scrollHeight,
+                    document.documentElement.scrollHeight,
+                    document.body.offsetHeight,
+                    document.documentElement.offsetHeight
+                );
+            }
+            catch(e){}
+            if (!height || buildfire.appearance._resizedTo == height || height < 100) return;
             var p = new Packet(null, 'appearance.autosizeContainer', {height: height});
             buildfire._sendPacket(p);
             buildfire.appearance._resizedTo = height;
@@ -582,6 +648,12 @@ var buildfire = {
         , setHeaderVisibility: function (value) {
             var p = new Packet(null, "appearance.setHeaderVisibility", value);
             buildfire._sendPacket(p);
+        }
+        , triggerOnUpdate: function () {
+            var appThemeCSSElement = document.getElementById("appThemeCSS");
+            if(appThemeCSSElement) {
+                appThemeCSSElement.href = appThemeCSSElement.href.replace("&v=" + buildfire.appearance.CSSBusterCounter, "&v=" + ++buildfire.appearance.CSSBusterCounter);
+            }
         }
     }
     /// ref: https://github.com/BuildFire/sdk/wiki/How-to-capture-Analytics-for-your-plugin
@@ -803,7 +875,7 @@ var buildfire = {
         // disablePixelRation: bool
         // }
         , resizeImage: function (url, options) {
-            var root = "http://s7obnu.cloudimage.io/s/";
+
             var ratio = options.disablePixelRation?1:window.devicePixelRatio;
             if (!options)
                 options = {width: window.innerWidth};
@@ -813,17 +885,35 @@ var buildfire = {
             if (options.width == 'full') options.width = window.innerWidth;
             if (options.height == 'full') options.height = window.innerHeight;
 
-            if (options.width && !options.height)
-                return root + "width/" + (options.width * ratio) + "/" + url;
-            else if (!options.width && options.height)
-                return root + "height/" + (options.height * ratio) + "/" + url;
-            else if (options.width && options.height)
-                return root + "resizenp/" + Math.floor(options.width * ratio) + "x" + Math.floor(options.height * ratio) + "/" + url;
-            else
-                return url;
+
+            if(url.indexOf("http://imageserver.prod.s3.amazonaws.com") == 0) {
+                var root ="http://buildfire.imgix.net" + url.substring(40); // length of root host
+
+                if (options.width && !options.height)
+                    return root + "?w=" + Math.floor(options.width * ratio) ;
+                else if (!options.width && options.height)
+                    return root + "?h=" + Math.floor(options.height * ratio) ;
+                else if (options.width && options.height)
+                    return root + "?w" + Math.floor(options.width * ratio) + "&h=" + Math.floor(options.height * ratio) ;
+                else
+                    return url;
+            }
+            else{
+                var root = "http://s7obnu.cloudimage.io/s/";
+                if (options.width && !options.height)
+                    return root + "width/" + Math.floor(options.width * ratio) + "/" + url;
+                else if (!options.width && options.height)
+                    return root + "height/" + Math.floor(options.height * ratio) + "/" + url;
+                else if (options.width && options.height)
+                    return root + "resizenp/" + Math.floor(options.width * ratio) + "x" + Math.floor(options.height * ratio) + "/" + url;
+                else
+                    return url;
+            }
         }
         , cropImage: function (url, options) {
-            var root = "http://s7obnu.cloudimage.io/s/crop/";
+
+            var ratio = options.disablePixelRation?1:window.devicePixelRatio;
+
             if (typeof(options) != "object")
                 throw ("options not an object");
 
@@ -833,7 +923,22 @@ var buildfire = {
             if (options.width == 'full') options.width = window.innerWidth;
             if (options.height == 'full') options.height = window.innerHeight;
 
-            return root + Math.floor(options.width) + "x" + Math.floor(options.height) + "/" + url;
+            if(!options.width || !options.height){
+                console.warn('cropImage doenst have width or height please fix. returning original url');
+                return url;
+            }
+
+
+            if(url.indexOf("http://imageserver.prod.s3.amazonaws.com") == 0) {
+                var root = "http://buildfire.imgix.net" + url.substring(40); // length of root host
+                return root + "?fit=crop"
+                    + (options.width? "&w=" + Math.floor(options.width * ratio):"")
+                    + (options.height ? "&h=" + Math.floor(options.height * ratio) : "") ;
+            }
+            else {
+                var root = "http://s7obnu.cloudimage.io/s/crop/";
+                return root + Math.floor(options.width * ratio) + "x" + Math.floor(options.height * ratio) + "/" + url;
+            }
 
         }
 
@@ -950,7 +1055,7 @@ var buildfire = {
             callback(qs.dld); /// dld: Deep Link Data
         }
         , createLink: function (obj) {
-            var root = "app" + buildfire.context.appId + "://plugin";
+            var root = "app" + buildfire._context.appId + "://plugin";
             if (!obj)
                 return root;
             else
@@ -977,8 +1082,7 @@ var buildfire = {
             buildfire._sendPacket(p);
         },
         getCurrentUser: function (callback) {
-            var options = {};
-            var p = new Packet(null, 'auth.getCurrentUser', options);
+            var p = new Packet(null, 'auth.getCurrentUser');
             buildfire._sendPacket(p, callback);
         },
         onLogin: function (callback, allowMultipleHandlers) {
@@ -991,7 +1095,11 @@ var buildfire = {
             return buildfire.eventManager.add('authOnLogout', callback, allowMultipleHandlers);
         }
         , triggerOnLogout: function (data) {
-            return buildfire.eventManager.add('authOnLogout', data);
+            return buildfire.eventManager.trigger('authOnLogout', data);
+        },
+        openProfile: function (userId) {
+            var p = new Packet(null, 'auth.openProfile', userId);
+            buildfire._sendPacket(p);
         }
     }
     /// ref: https://github.com/BuildFire/sdk/wiki/BuildFire-Device-Features
@@ -1000,6 +1108,9 @@ var buildfire = {
             addEvent: function(event,callback){
                 buildfire._sendPacket(new Packet(null,'device.calendar.addEvent',event),callback);
             }
+        },
+        share: function(messageObj, callback){
+            buildfire._sendPacket(new Packet(null,'device.share',messageObj),callback);
         }
     }
     /// ref: https://github.com/BuildFire/sdk/wiki/BuildFire-Geo-Location-Feature
@@ -1020,10 +1131,59 @@ buildfire.init();
 
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    buildfire.appearance.autosizeContainer();
+    //buildfire.appearance.autosizeContainer();
     console.info('DOMContentLoaded');
-    if(window.location.href.indexOf('/widget/'))
+
+    buildfire.getContext(function (err, context) {
+        console.log("tracer: got getContext");
+        if (err) {
+            console.error(err);
+        }
+        else {
+            if (context.debugTag)
+                buildfire.logger.attachRemoteLogger(context.debugTag);
+            if (window.location.pathname.indexOf('/widget/') > 0) {
+                buildfire.appearance.attachAppThemeCSSFiles(context.appId, context.liveMode, context.endPoints.appHost);
+            }
+        }
+    });
+
+    if(window.location.href.indexOf('/widget/') && !buildfire.appearance.disableFastClickOnLoad)
         buildfire.appearance.attachFastClick();
+
+    var metaTags = null;
+    var buildfireMetaTags = document.head.querySelector("meta[name=buildfire]");
+    if(buildfireMetaTags)
+        metaTags = buildfireMetaTags.split(",");
+    var overwriteOnClick = true;
+    if(metaTags != null) {
+        for(var i = 0 ; i < metaTags.length ; i++){
+            if(buildfireMetaTags[i] == 'disableExternalLinkOverride')
+                overwriteOnClick= false;
+        }
+    }
+
+
+    if(overwriteOnClick) {
+        document.onclick = function (e) {
+            e = e ||  window.event;
+            var element = e.target || e.srcElement;
+            var href = element.getAttribute('href');
+            var inAppBrowser  = element.getAttribute("inAppBrowser");
+            if(element.tagName == 'A' && href != null && href != '' && inAppBrowser == null){
+                var regexp = new RegExp('^(http:\/|https:\/|http:\/\/|https:\/\/|www.)[a-z0-9]');
+                if (element.tagName == 'A' && regexp.test(href)) {
+                    e.preventDefault();
+                    var target = element.getAttribute('inAppBrowser') || '_blank';
+                    buildfire.navigation.openWindow(href, target, null);
+                }
+            }
+        };
+    }
+	setTimeout(function(){
+		buildfire.appearance._forceCSSRender();
+	}, 1750);
+
 });
 document.addEventListener("resize", function (event) {
     buildfire.appearance.autosizeContainer();
@@ -1042,7 +1202,7 @@ if(typeof(CustomEvent) != "function"){
         var evt = document.createEvent('CustomEvent');
         evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
         return evt;
-    };
+    }
 
     CustomEvent.prototype = window.Event.prototype;
     window.CustomEvent = CustomEvent;
