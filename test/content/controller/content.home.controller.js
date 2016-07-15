@@ -6,62 +6,89 @@ describe('Unit : Controller - ContentHomeCtrl', function () {
     var
         ContentHome, scope, Modals, DB, $timeout, COLLECTIONS, $q, Buildfire, Utils, DEFAULT_DATA;
     beforeEach(module('geoFencePluginContent', function ($provide) {
-        $provide.service('Buildfire', function () {
-            this.datastore = jasmine.createSpyObj('datastore', ['save', 'update', 'search', 'insert']);
-            this.datastore.update.and.callFake(function (_tagName, id, data, callback) {
-                if (_tagName) {
-                    callback(null, {
-                        data: {
-                            title: 'Item1',
-                            epicenter: {},
-                            radius: 2.12
+            $provide.service('Buildfire', function () {
+                this.datastore = jasmine.createSpyObj('datastore', ['save', 'update', 'search', 'insert', 'get']);
+                this.datastore.update.and.callFake(function (_tagName, id, data, callback) {
+                    if (_tagName) {
+                        callback(null, {
+                            data: {
+                                title: 'Item1',
+                                epicenter: {},
+                                radius: 2.12
+                            }
+                        });
+                    } else {
+                        callback('Error', null);
+                    }
+                });
+                this.datastore.get.and.callFake(function (_tagName, callback) {
+                        switch (_tagName) {
+                            case 'GEO_ACTION':
+                                callback(null, {data: {
+                                    title: '',
+                                    notificationMessage: '',
+                                    actionToPerform: {},
+                                    epicenter: {address: '', coordinates: {lat: '', long: ''}},
+                                    radius: 10 //in meters
+                                }});
+                                break;
+                            case 'GEO_INFO':
+                                callback(null, {data: {
+                                    highAccuracy: false
+                                }});
+                                break;
+                            default:
+                                callback('Error', null);
                         }
-                    });
-                } else {
-                    callback('Error', null);
-                }
+                    }
+                );
+                this.datastore.insert.and.callFake(function (data, _tagName, id, callback) {
+                    if (_tagName) {
+                        callback(null, {
+                            data: {
+                                title: 'Item1',
+                                epicenter: {},
+                                radius: 2.12
+                            }
+                        });
+                    } else {
+                        callback('Error', null);
+                    }
+                });
+                this.datastore.save.and.callFake(function (options, _tagName, callback) {
+                    if (_tagName) {
+                        callback(null, [
+                            {
+                                data: {
+                                    title: 'Item1',
+                                    epicenter: {},
+                                    radius: 2.12
+                                }
+                            }
+                        ]);
+                    } else {
+                        callback('Error', null);
+                    }
+                });
+                this.datastore.search.and.callFake(function (options, _tagName, callback) {
+                    if (_tagName) {
+                        callback(null, [
+                            {
+                                data: {
+                                    title: 'Item1',
+                                    epicenter: {},
+                                    radius: 2.12
+                                }
+                            }
+                        ]);
+                    } else {
+                        callback('Error', null);
+                    }
+                });
             });
-            this.datastore.insert.and.callFake(function (data, _tagName, id, callback) {
-                if (_tagName) {
-                    callback(null, {
-                        data: {
-                            title: 'Item1',
-                            epicenter: {},
-                            radius: 2.12
-                        }
-                    });
-                } else {
-                    callback('Error', null);
-                }
-            });
-            this.datastore.save.and.callFake(function (options, _tagName, callback) {
-                if (_tagName) {
-                    callback(null, [{
-                        data: {
-                            title: 'Item1',
-                            epicenter: {},
-                            radius: 2.12
-                        }
-                    }]);
-                } else {
-                    callback('Error', null);
-                }
-            });
-            this.datastore.search.and.callFake(function (options, _tagName, callback) {
-                if (_tagName) {
-                    callback(null, [{
-                        data: {
-                            title: 'Item1',
-                            epicenter: {},
-                            radius: 2.12
-                        }
-                    }]);
-                } else {
-                    callback('Error', null);
-                }
-            });
-        });
-    }));
+        })
+    )
+    ;
 
     beforeEach(inject(function ($controller, _Buildfire_, _$rootScope_, _Modals_, _DB_, _$timeout_, _COLLECTIONS_, _DEFAULT_DATA_, _Utils_, _$q_) {
             scope = _$rootScope_.$new();
@@ -228,7 +255,7 @@ describe('Unit : Controller - ContentHomeCtrl Error', function () {
     var ContentHome, scope, Modals, DB, $timeout, COLLECTIONS, $q, Buildfire, Utils, DEFAULT_DATA;
     beforeEach(module('geoFencePluginContent', function ($provide) {
         $provide.service('Buildfire', function () {
-            this.datastore = jasmine.createSpyObj('datastore', ['save', 'update', 'search', 'insert']);
+            this.datastore = jasmine.createSpyObj('datastore', ['save', 'update', 'search', 'insert', 'get']);
             this.datastore.update.and.callFake(function (_tagName, id, data, callback) {
                 callback('Error', null);
             });
@@ -239,6 +266,9 @@ describe('Unit : Controller - ContentHomeCtrl Error', function () {
                 callback('Error', null);
             });
             this.datastore.search.and.callFake(function (options, _tagName, callback) {
+                callback('Error', null);
+            });
+            this.datastore.get.and.callFake(function (_tagName, callback) {
                 callback('Error', null);
             });
         });
@@ -299,13 +329,13 @@ describe('Unit : Controller - ContentHomeCtrl Error', function () {
 
         it('it should do nothing if index is invalid', function () {
             ContentHome.items = ['test'];
-            ContentHome.removeListItem(-1,{event:'event'});
+            ContentHome.removeListItem(-1, {event: 'event'});
             expect(spy).not.toHaveBeenCalled();
         });
 
         it('it should work fine if index is valid', function () {
             ContentHome.items = ['test'];
-            ContentHome.removeListItem(0,{event:'event'});
+            ContentHome.removeListItem(0, {event: 'event'});
             expect(spy).toHaveBeenCalled();//With({title:'test'});
 
         });
@@ -351,7 +381,7 @@ describe('Unit : Controller - ContentHomeCtrl null', function () {
         ContentHome, scope, Modals, DB, $timeout, COLLECTIONS, $q, Buildfire, Utils, DEFAULT_DATA;
     beforeEach(module('geoFencePluginContent', function ($provide) {
         $provide.service('Buildfire', function () {
-            this.datastore = jasmine.createSpyObj('datastore', ['save', 'update', 'search', 'insert']);
+            this.datastore = jasmine.createSpyObj('datastore', ['save', 'update', 'search', 'insert', 'get']);
             this.datastore.update.and.callFake(function (_tagName, id, data, callback) {
                 callback();
             });
@@ -362,6 +392,9 @@ describe('Unit : Controller - ContentHomeCtrl null', function () {
                 callback();
             });
             this.datastore.search.and.callFake(function (options, _tagName, callback) {
+                callback();
+            });
+            this.datastore.get.and.callFake(function (_tagName, callback) {
                 callback();
             });
         });
@@ -437,7 +470,7 @@ describe('Unit : Controller - ContentHomeCtrl null', function () {
 
     describe('Unit: ContentHome.selectItem', function () {
         it('should select the item', function () {
-            ContentHome.geoAction = {data: {title: 'preItem'},radius:123.12};
+            ContentHome.geoAction = {data: {title: 'preItem'}, radius: 123.12};
             ContentHome.selectItem({
                 data: {
                     title: 'SelectedItem',
