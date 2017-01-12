@@ -21,15 +21,7 @@
                                     coordinates: coordinates
                                 }
                             });
-                        }/*else{
-
-                            scope.setLocationInController({
-                                data: {
-                                    location: location,
-                                    coordinates: coordinates
-                                }
-                            });
-                        }*/
+                        }
                     });
                 }
             };

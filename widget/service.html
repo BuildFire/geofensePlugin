@@ -39,11 +39,6 @@
                     }
                     watcherFun();
                 });
-
-                //Handle notification onClick event
-                buildfire.notifications.localNotification.onClick = function (data) {
-                    buildfire.actionItems.execute(data.actionToPerform);
-                };
             }
 
             function distance(lat1, lon1, lat2, lon2, unit) {
@@ -78,10 +73,13 @@
                         console.log('Distance---------------------', dis, 'Item-------------------------------', item);
                         if (dis < item.data.radius && !item.actionPerformed) {
                             item.notificationDisplayTime = new Date().getTime();
+
+                            console.log('actionToPerform', item.data.actionToPerform);
+
                             var options = {
                                 title: item.data.title,
                                 text: item.data.notificationMessage,
-                                data: item.data
+                                actionItem: (item.data.actionToPerform) ? item.data.actionToPerform : null
                             };
                             buildfire.notifications.localNotification.send(options, function (err, data) {
                                 notificationId = data.id;
