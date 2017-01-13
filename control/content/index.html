@@ -28,6 +28,18 @@
 </head>
 <body ng-controller="ContentHomeCtrl as ContentHome">
 <div class="item clearfix row">
+    <div class="col-xs-12 pull-left">
+        Welcome to the GeoFence plugin service!
+        This plugin allows you to trigger an action (e.g. local push notification, phone call, email, etc.) when users enter specific locations while the app is running in the background.
+        Since the plugin runs in the background of your app, you do not need to link it on your app for it to work, and we recommend that you don't as it's not necessary.
+        <br><br>
+        <p class="info">
+            Note: In order for the plugin to work in the control panel, you must access the site via HTTPS.
+        </p>
+    </div>
+</div>
+<hr class="none">
+<div class="item clearfix row">
     <div class="col-xs-4 col-xs-offset-4 pull-left margin-left-ten">
         <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add New Geo Action</a>
     </div>
@@ -96,24 +108,6 @@
             </div>
         </div>
         <hr class="none">
-        <!--<div class="item clearfix row">
-            <div class="labels col-xs-3 pull-left">
-                <span>Dismiss Button</span>
-            </div>
-            <div class="main col-xs-9 pull-right">
-                <input type="text" placeholder="Dismiss, Cancel, Close, etc." class="form-control" ng-model="ContentHome.geoAction.data.dismissButtonTitle">
-            </div>
-        </div>
-        <hr class="none">
-        <div class="item clearfix row">
-            <div class="labels col-xs-3 pull-left">
-                <span>Action Button</span>
-            </div>
-            <div class="main col-xs-9 pull-right">
-                <input type="text" placeholder="Done, Ok, Go, etc." class="form-control" ng-model="ContentHome.geoAction.data.actionButtonTitle">
-            </div>
-        </div>
-        <hr class="none">-->
         <div class="item clearfix row">
             <div class="labels col-xs-3 pull-left">
                 <span>Epicenter</span>

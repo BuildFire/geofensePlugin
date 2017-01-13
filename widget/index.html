@@ -2,26 +2,33 @@
 <html ng-app="geoFenceWidget">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-	<!-- Load helper.css to use our helper classes.
-	<link href="../../../../styles/helper.css" rel="stylesheet">
-	-->
-	
+    <meta name="buildfire" content="disableTheme,disableFastClick">
+
 	<!-- JS -->
 	<script src="../../../scripts/buildfire.js"></script>
-    <script src="../../../scripts/buildfire/services/notifications/localNotifications.js"></script>
-    <script src="../../../scripts/angular/angular.min.js"></script>
-    <script src="../../../scripts/angular/ui-bootstrap.min.js"></script>
+    <script>
+        var showOneTimeAlertFlag = true;
 
-    <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
-	<script src="https://maps.google.com/maps/api/js?v=3.exp&sensor=true&libraries=places&key=AIzaSyCRWyvs4UfQ9qjen_smzLFmpVqsjqTYdFI"></script>
-	<script src="app.js"></script>
-    <script src="enums.js"></script>
-    <script src="services.js"></script>
-    <script src="controllers/widget.home.controller.js"></script>
+        buildfire.geo.watchPosition(
+            {enableHighAccuracy: false, timeout: 3000},
+            function (position) {
+                if (!position.coords.latitude) {
+                    if (showOneTimeAlertFlag) {
+                        Buildfire.notifications.alert({message: "Enable your location services"});
+                        showOneTimeAlertFlag = false;
+                    }
+                } else {
+                    document.getElementById('lat').innerHTML = position.coords.latitude;
+                    document.getElementById('lng').innerHTML = position.coords.longitude;
+                }
+            });
+    </script>
 </head>
-<body ng-controller="WidgetHomeCtrl as WidgetHome">
-	<div> latitude: {{ latitude }}</div>
-    <div> longitude: {{ longitude }}</div>
+<body>
+    <img style="margin: auto; display: block;" src="geoFenceIcon.png">
+    <br>
+    <div style="text-align: center"><div id="lat"></div></div>
+    <div style="text-align: center"><div id="lng"></div></div>
 </body>
 </html>
+
