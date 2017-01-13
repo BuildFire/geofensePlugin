@@ -28,6 +28,14 @@
 </head>
 <body ng-controller="ContentHomeCtrl as ContentHome">
 <div class="item clearfix row">
+    <div class="col-xs-12 pull-left">
+        This plugin runs in the background of your app.
+        This makes it unnecessary to link to it from the side menu.
+        In order to test the plugin in the control panel, you must access the control panel via HTTPS.
+    </div>
+</div>
+<hr class="none">
+<div class="item clearfix row">
     <div class="col-xs-4 col-xs-offset-4 pull-left margin-left-ten">
         <a class="btn btn-success stretch" ng-click="ContentHome.addNewItem()" ng-disabled="ContentHome.updatingData">Add New Geo Action</a>
     </div>
