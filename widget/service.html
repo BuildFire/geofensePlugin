@@ -79,7 +79,8 @@
                             var options = {
                                 title: item.data.title,
                                 text: item.data.notificationMessage,
-                                actionItem: (item.data.actionToPerform) ? item.data.actionToPerform : null
+                                actionItem: (item.data.actionToPerform) ? item.data.actionToPerform : null,
+                                returnToPluginInstanceId: 'none'
                             };
                             buildfire.notifications.localNotification.send(options, function (err, data) {
                                 notificationId = data.id;

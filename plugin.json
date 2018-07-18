@@ -18,6 +18,6 @@
 ,"widget":{
     "service":"service.html"
 },
-  "features" : [{"name" : "Geo"}, {"name": "localNotification"}, {"name": "BackgroundMode"}, {"name": "BackgroundGeo"}],
+  "features" : [{"name" : "Geo"}, {"name": "localNotification"}, {"name": "BackgroundMode"}],
   "languages" : ["en"]
 }
