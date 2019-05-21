@@ -2,7 +2,7 @@
   "author":"BuildFire"
 ,"pluginName":"Geo-Fence Plugin"
 ,"pluginDescription":"The Geo-Fence Action plugin enables you to trigger actions on your users devices to occur when they enter specific GPS locations. These actions can include sending your users a local notification, open a specific plugin in the app, give them directions, have their device trigger an email or call a phone number. Keywords: Geo, geo-fence, geofence, map, maps."
-,"supportEmail":"[Your support Email]"
+,"supportEmail":"support@buildfire.com"
 ,"supportSite" :"http://learn.appdocumentation.com/plugin-tutorials/geo-fence-plugin-tutorial"
 ,"control":{
   "content":{
