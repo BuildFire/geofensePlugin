@@ -22,7 +22,6 @@
                         info = null;
                         console.error('Got Error while getting geoInfo------', err);
                     } else {
-                        console.log('Got Info in Widget------------', result);
                         info = result;
                     }
                 });
@@ -32,7 +31,6 @@
                         console.error('Error while getting searched items---------------', err);
                     }
                     else if (result) {
-                        console.log('Item got based on the search------------------Widget Section-------', result);
                         GeoItems = result;
                     } else {
                         console.error('No result found');
@@ -70,11 +68,8 @@
                     }
                     if (item.data && item.data.epicenter && item.data.epicenter.coordinates && item.data.epicenter.coordinates.lng && item.data.epicenter.coordinates.lat) {
                         dis = distance(lat, lng, item.data.epicenter.coordinates.lat, item.data.epicenter.coordinates.lng, 'N');
-                        console.log('Distance---------------------', dis, 'Item-------------------------------', item);
                         if (dis < item.data.radius && !item.actionPerformed) {
                             item.notificationDisplayTime = new Date().getTime();
-
-                            console.log('actionToPerform', item.data.actionToPerform);
 
                             var options = {
                                 title: item.data.title,
@@ -84,7 +79,6 @@
                             };
                             buildfire.notifications.localNotification.send(options, function (err, data) {
                                 notificationId = data.id;
-                                console.log("local notification send method callback :::::", data);
                             });
                         }
                         item.actionPerformed = dis < item.data.radius;
@@ -93,19 +87,15 @@
             }
 
             function watcherFun() {
-                console.log("Inside watcherFun method--------");
-
                 buildfire.geo.watchPosition(
                         {enableHighAccuracy: (info && info.data && info.data.highAccuracy) || false, timeout: 30000},
                         function (position) {
-                            console.log('Position is :::::::::::', position);
                             if (!position.coords.latitude) {
                                 if (showOneTimeAlertFlag) {
                                     buildfire.notifications.alert({message: "Enable your location service to use this plugin"});
                                     showOneTimeAlertFlag = false;
                                 }
                             } else {
-                                console.info('Watching Position------watchId:::', position.watchId, position, ' accuracy:' + info.data.highAccuracy, info);
                                 if (position && position.coords && position.coords.latitude && position.coords.longitude) {
                                     triggerAction(position.coords.latitude, position.coords.longitude);
                                 }
