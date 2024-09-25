@@ -21,7 +21,6 @@ module.exports = function(config) {
       'test/assets/bower_components/angular-route/angular-route.min.js',
       'test/assets/bower_components/angular-bootstrap/ui-bootstrap.min.js',
       'test/assets/bower_components/angular-mocks/angular-mocks.js',
-      'https://maps.googleapis.com/maps/api/js?key=AIzaSyBpEguTSmOeMQM-4lLaJRoyWN8SlUrOjkg&v=3.exp&libraries=places',
       'test/assets/*.js',
       'control/content/**/*.js',
       'test/**/*.js'
