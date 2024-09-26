@@ -2,7 +2,7 @@
     "use strict";
     angular
         .module('geoFencePluginContent')
-        .directive('googleLocationSearch', [ function() {
+        .directive('googleLocationSearch', function() {
           return {
               restrict: 'A',
               scope: { setLocationInController: '&callbackFn' },
@@ -13,12 +13,10 @@
                           types: ['geocode']
                       };
                       var autocomplete = new google.maps.places.Autocomplete(element[0], options);
-
                       google.maps.event.addListener(autocomplete, 'place_changed', function () {
-                          var place = autocomplete.getPlace();
-                          var location = place.formatted_address;
-                          if (place.geometry) {
-                              var coordinates = [place.geometry.location.lng(), place.geometry.location.lat()];
+                          var location = autocomplete.getPlace().formatted_address;
+                          if (autocomplete.getPlace().geometry) {
+                              var coordinates = [autocomplete.getPlace().geometry.location.lng(), autocomplete.getPlace().geometry.location.lat()];
                               scope.setLocationInController({
                                   data: {
                                       location: location,
@@ -33,7 +31,7 @@
                   });
               }
           };
-      }])
+      })
         .directive("googleMap", [ '$timeout', function($timeout) {
           return {
               template: "<div></div>",
@@ -49,29 +47,31 @@
                       attrs.$observe('googleMap', redrawTheCircle);
                       attrs.$observe('googleMapRadius', redrawTheCircle);
 
-                      function calculateRadius() {
+                      function calculateRadius(){
                           var radiusInMeters;
-                          if (((parseFloat(scope.ContentHome.geoAction?.data?.radius) || 10) * 1609.34 < 3.048)) {
-                              radiusInMeters = 3.048;
-                              scope.ContentHome.geoAction.data.radius = 3.048 / 1609.34;
+                          if((((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34 < 3.048) ){
+                              radiusInMeters= 3.048;
+                              scope.ContentHome.geoAction.data.radius=3.048/1609.34;
                               calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
-                          } else {
-                              radiusInMeters = (parseFloat(scope.ContentHome.geoAction?.data?.radius) || 10) * 1609.34;
+                          }
+                          else{
+                              radiusInMeters=((scope.ContentHome.geoAction && scope.ContentHome.geoAction.data && parseFloat(scope.ContentHome.geoAction.data.radius)) || 10) * 1609.34;
                           }
                           return radiusInMeters;
                       }
-
-                      function calculateRadiusInMilesAndFeet(radiusInMiles) {
-                          scope.ContentHome.radiusMiles = parseInt(radiusInMiles);
-                          if (scope.ContentHome.radiusMiles) {
-                              scope.ContentHome.radiusFeet = parseInt((parseFloat(radiusInMiles) % scope.ContentHome.radiusMiles) * 5280);
-                          } else {
-                              scope.ContentHome.radiusFeet = parseInt(parseFloat(radiusInMiles) * 5280);
+                      function calculateRadiusInMilesAndFeet(radiusInMiles){
+                          scope.ContentHome.radiusMiles=parseInt(radiusInMiles);
+                          if(scope.ContentHome.radiusMiles){
+                              scope.ContentHome.radiusFeet=parseInt((parseFloat(radiusInMiles)%scope.ContentHome.radiusMiles)*5280);
+                          }
+                          else{
+                              scope.ContentHome.radiusFeet=parseInt(parseFloat(radiusInMiles)*5280);
                           }
                       }
 
                       function redrawTheCircle(newVal, oldVal) {
-                          if (circle) circle.setMap(null);
+                          if (circle)
+                              circle.setMap(null);
                           circle = new google.maps.Circle({
                               strokeColor: '#09a3ee',
                               strokeOpacity: 0.8,
@@ -79,27 +79,27 @@
                               fillColor: '#09a3ee',
                               fillOpacity: 0.35,
                               map: map,
-                              center: scope.ContentHome.center || { lat: 32.715738, lng: -117.16108380000003 },
+                              center: (scope.ContentHome.center && scope.ContentHome.center.lat && scope.ContentHome.center.lng && scope.ContentHome.center) || ({"lat":32.715738,"lng":-117.16108380000003}),
                               radius: calculateRadius(),
                               editable: true
                           });
-
-                          if (map && circle) map.panTo(circle.getCenter());
-
+                          if (map && circle)
+                              map.panTo(circle.getCenter());
                           circle.addListener('radius_changed', function () {
                               scope.$apply(function () {
-                                  scope.ContentHome.geoAction.data.radius = circle.getRadius() / 1609.34;
+                                  scope.ContentHome.geoAction.data.radius = (circle.getRadius()/1609.34);
                                   calculateRadiusInMilesAndFeet(scope.ContentHome.geoAction.data.radius);
                               });
+                              console.info('Circle radius_changed Event called');
                           });
-
                           circle.addListener('center_changed', function () {
                               var newCenter = circle.getCenter();
-                              scope.$apply(function () {
-                                  scope.ContentHome.center = { lat: newCenter.lat(), lng: newCenter.lng() };
-                                  scope.ContentHome.selectedLocation = newCenter.lat() + ',' + newCenter.lng();
-                                  scope.ContentHome.geoAction.data.epicenter.address = scope.ContentHome.selectedLocation;
-                                  scope.ContentHome.geoAction.data.epicenter.coordinates = scope.ContentHome.center;
+                              console.info('center_changed Event called',newCenter, newCenter.lat(), newCenter.lng());
+                              scope.ContentHome.center = {lat: newCenter.lat(), lng: newCenter.lng()};
+                              scope.$apply(function(){
+                                  scope.ContentHome.selectedLocation=newCenter.lat()+','+newCenter.lng();
+                                  scope.ContentHome.geoAction.data.epicenter.address=scope.ContentHome.selectedLocation;
+                                  scope.ContentHome.geoAction.data.epicenter.coordinates=scope.ContentHome.center;
                               });
                               map.panTo(circle.getCenter());
                           });

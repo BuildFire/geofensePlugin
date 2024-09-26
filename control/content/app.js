@@ -10,11 +10,11 @@
           'infinite-scroll',
           'geoFenceModals'
       ])
-      // Injected ui.bootstrap for angular bootstrap component
+      //injected ui.bootstrap for angular bootstrap component
       .config(['$compileProvider', '$httpProvider', function ($compileProvider, $httpProvider) {
 
           /**
-           * To make href URLs safe on mobile
+           * To make href urls safe on mobile
            */
           $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|cdvfile|file):/);
 
@@ -73,10 +73,6 @@
                   };
 
                   window.gm_authFailure = () => {
-                      buildfire.dialog.alert({
-                          title: 'Error',
-                          message: 'Failed to load Google Maps API.',
-                      });
                       deferred.reject('Failed to authenticate Google Maps API.');
                   };
 
