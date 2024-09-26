@@ -1,0 +1,5 @@
+#lng , #lat {
+    color: var(--bf-theme-body-text);
+    font-family: var(--bf-font-family);
+    margin: 10px 0;
+}
