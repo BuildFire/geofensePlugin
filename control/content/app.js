@@ -51,7 +51,7 @@
               const {apiKeys} = buildfire.getContext();
               const {googleMapKey} = apiKeys;
 
-              const url = `https://maps.googleapis.com/maps/api/js?key=${googleMapKey}&v=3.exp&libraries=places`;
+              const url = `https://maps.googleapis.com/maps/api/js?key=${googleMapKey}&v=weekly&libraries=places`;
 
               const deferred = $q.defer();
 

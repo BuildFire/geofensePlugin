@@ -41,7 +41,9 @@
                       var circle;
                       var map = new google.maps.Map(elem[0], {
                           zoom: 9,
-                          center: { lat: 37.090, lng: -95.712 }
+                          center: { lat: 37.090, lng: -95.712 },
+                          zoomControl: true,
+                          cameraControl: false,
                       });
 
                       attrs.$observe('googleMap', redrawTheCircle);
