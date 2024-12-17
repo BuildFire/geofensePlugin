@@ -1,5 +1,5 @@
 {
-  "author":"BuildFire"
+  "author":"Buildfire"
 ,"pluginName":"Geo-Fence Plugin"
 ,"pluginDescription":"The Geofence plugin is a powerful tool that allows you to create custom location-based triggers for your mobile app."
 ,"supportEmail":"support@buildfire.com"
@@ -30,6 +30,6 @@
       "type": "youtube-video",
       "path": "https://www.youtube.com/watch?v=BSwuOFATXAs"
     }
-		
+
 	]
 }
