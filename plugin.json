@@ -1,7 +1,7 @@
 {
   "author":"Buildfire"
-,"pluginName":"Geo-Fence Plugin"
-,"pluginDescription":"The Geofence plugin is a powerful tool that allows you to create custom location-based triggers for your mobile app."
+,"pluginName":"Geofencer"
+,"pluginDescription":"Create custom location-based triggers with the Geofence plugin, enabling tailored actions in your mobile app based on user location."
 ,"supportEmail":"support@buildfire.com"
 ,"supportSite" :"http://learn.appdocumentation.com/plugin-tutorials/geo-fence-plugin-tutorial"
 ,"control":{
