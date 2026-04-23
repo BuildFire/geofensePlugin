@@ -1,3 +1,7 @@
+body {
+    padding-top: var(--bf-safe-area-inset-top) !important;
+}
+
 #lng , #lat {
     color: var(--bf-theme-body-text);
     font-family: var(--bf-font-family);
